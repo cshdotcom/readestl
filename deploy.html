@@ -124,7 +124,7 @@ docker --version</pre>
   -v readest-data:/data \
   -e ADMIN_EMAIL=admin@example.com \
   -e ADMIN_PASSWORD=changeme \
-  cshdotcom/readest-lite:latest</pre>
+  cshll/readest-lite:latest</pre>
       <div class="note warn">请务必修改默认密码，生产环境使用 16 位以上随机字符串。</div>
     </section>
 
@@ -136,7 +136,7 @@ docker --version</pre>
 <pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="k">version</span>: <span class="v">"3.8"</span>
 <span class="k">services</span>:
   <span class="k">readest-lite</span>:
-    <span class="k">image</span>: <span class="v">cshdotcom/readest-lite:latest</span>
+    <span class="k">image</span>: <span class="v">cshll/readest-lite:latest</span>
     <span class="k">container_name</span>: <span class="v">readest-lite</span>
     <span class="k">restart</span>: <span class="v">unless-stopped</span>
     <span class="k">ports</span>:
@@ -265,7 +265,7 @@ docker image prune -f</pre>
       <p><code>data/books/uploads/</code> 存书籍原文，<code>data/books/covers/</code> 存封面图，容器重建不丢失。</p>
 
       <h3>支持多用户吗？</h3>
-      <p>当前仅支持单管理员账号。如需多用户，欢迎在 <a href="https://github.com/cshdotcom/readest-lite/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a> 讨论。</p>
+      <p>当前仅支持单管理员账号。如需多用户，欢迎在 <a href="https://github.com/cshll/readest-lite/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a> 讨论。</p>
 
       <h3>如何迁移数据？</h3>
       <p>直接复制整个 <code>data/</code> 目录到新服务器，用相同参数启动容器即可。SQLite 文件可跨平台使用。</p>
