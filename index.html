@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Readest Lite — 轻量自部署，阅读无界</title>
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。支持 EPUB/PDF/MOBI、TTS 朗读、云端同步与无限批注，单 Docker 容器部署，数据完全自主。">
+  <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储">
+  <meta name="author" content="cshdotcom">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://cshdotcom.github.io/readestl/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cshdotcom.github.io/">
+  <meta property="og:title" content="Readest Lite — 轻量自部署，阅读无界">
+  <meta property="og:description" content="基于 Readest 的轻量化自部署阅读器，去除付费限制，保留全部核心功能。">
+  <meta property="og:image" content="https://cshdotcom.github.io/og-image.png">
+  <meta property="og:site_name" content="Readest Lite">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Readest Lite — 轻量自部署，阅读无界">
+  <meta name="twitter:image" content="https://cshdotcom.github.io/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Readest Lite","url":"https://cshdotcom.github.io/","description":"基于 Readest 的轻量化自部署阅读器","applicationCategory":"BookApplication","operatingSystem":"Docker","offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},"author":{"@type":"Organization","name":"cshdotcom","url":"https://github.com/cshdotcom"},"isBasedOn":{"@type":"SoftwareApplication","name":"Readest","url":"https://github.com/readest/readest"}}</script>
+  <style>
+    :root{--bg:#07070c;--bg2:#0d0d14;--card:#12121b;--card-h:#181824;--fg:#eeeef4;--fg2:#8e8ea6;--muted:#555570;--accent:#6c5ce7;--accent-l:#a29bfe;--accent-g:rgba(108,92,231,.25);--teal:#00cec9;--teal-g:rgba(0,206,201,.15);--pink:#fd79a8;--green:#00b894;--grad1:linear-gradient(135deg,#6c5ce7,#a29bfe);--grad3:linear-gradient(135deg,#6c5ce7,#00cec9);--border:rgba(255,255,255,.05);--border-h:rgba(255,255,255,.1);--r:14px;--r-sm:8px;--r-lg:22px;--shadow:0 8px 32px rgba(0,0,0,.5);--ease:.3s cubic-bezier(.4,0,.2,1);--sans:'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono','Fira Code',monospace}
+    html[data-theme="light"]{--bg:#fafafe;--bg2:#f2f2f8;--card:#fff;--card-h:#f5f5fa;--fg:#1a1a2e;--fg2:#5f5f78;--muted:#9494a8;--accent-g:rgba(108,92,231,.12);--border:rgba(0,0,0,.05);--border-h:rgba(0,0,0,.1);--shadow:0 8px 32px rgba(0,0,0,.06)}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}::selection{background:var(--accent);color:#fff}a{color:var(--accent-l);text-decoration:none;transition:var(--ease)}a:hover{color:var(--accent)}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
+    .bg-mesh{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}.bg-mesh .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.3;animation:orbF 25s ease-in-out infinite}.bg-mesh .orb:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,var(--accent-g),transparent 70%);top:-200px;right:-100px}.bg-mesh .orb:nth-child(2){width:400px;height:400px;background:radial-gradient(circle,var(--teal-g),transparent 70%);bottom:-100px;left:-100px;animation-delay:-8s}@keyframes orbF{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+
+    .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 2rem;transition:background .3s,border-color .3s,backdrop-filter .3s;border-bottom:1px solid transparent}.nav.scrolled{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(7,7,12,.85);border-bottom-color:var(--border)}html[data-theme="light"] .nav.scrolled{background:rgba(250,250,254,.88)}
+    .nav-inner{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;color:var(--fg);letter-spacing:-.02em}.nav-logo svg{width:30px;height:30px}.nav-logo .lite{font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--grad3);color:#fff;margin-left:2px}
+    .nav-links{display:flex;align-items:center;gap:1.75rem;list-style:none}.nav-links a{color:var(--fg2);font-size:.88rem;font-weight:500;position:relative}.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--grad1);border-radius:1px;transition:width var(--ease)}.nav-links a:hover{color:var(--fg)}.nav-links a:hover::after{width:100%}
+    .nav-actions{display:flex;align-items:center;gap:.6rem}.theme-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--fg2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--ease)}.theme-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-g)}.theme-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .btn-nav{display:inline-flex;align-items:center;gap:7px;padding:7px 18px;border-radius:var(--r-sm);font-size:.82rem;font-weight:600;transition:var(--ease);border:none;cursor:pointer;text-decoration:none}.btn-nav-p{background:var(--grad1);color:#fff;box-shadow:0 4px 16px var(--accent-g)}.btn-nav-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px var(--accent-g);color:#fff}
+    .mob-btn{display:none;width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--fg);cursor:pointer;align-items:center;justify-content:center;font-size:1.1rem}
+
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 2rem 80px;position:relative;overflow:hidden}.hero-content{max-width:1140px;width:100%;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-text{position:relative;z-index:2}.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;background:var(--accent-g);border:1px solid rgba(108,92,231,.18);font-size:.75rem;font-weight:600;color:var(--accent-l);margin-bottom:1.5rem;animation:fiu .6s ease-out}.hero-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pd 2s ease-in-out infinite}@keyframes pd{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero h1{font-size:clamp(2.4rem,4.8vw,3.8rem);font-weight:900;line-height:1.08;letter-spacing:-.03em;margin-bottom:1.25rem;animation:fiu .6s ease-out .1s both}.hero h1 .gt{background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{font-size:1.08rem;color:var(--fg2);line-height:1.85;margin-bottom:2rem;max-width:500px;animation:fiu .6s ease-out .2s both}
+    .hero-actions{display:flex;gap:.85rem;flex-wrap:wrap;animation:fiu .6s ease-out .3s both}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:var(--r);font-size:.92rem;font-weight:600;transition:var(--ease);border:none;cursor:pointer;text-decoration:none}.btn-p{background:var(--grad1);color:#fff;box-shadow:0 4px 20px var(--accent-g)}.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 36px var(--accent-g);color:#fff}.btn-s{background:var(--card);color:var(--fg);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent);background:var(--card-h);transform:translateY(-2px);color:var(--fg)}
+    .hero-stats{display:flex;gap:2.5rem;margin-top:2.5rem;animation:fiu .6s ease-out .4s both}.stat-n{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.stat-l{font-size:.78rem;color:var(--muted);margin-top:1px}
+    .hero-visual{position:relative;display:flex;align-items:center;justify-content:center;animation:fiu .8s ease-out .2s both}.hero-mockup{position:relative;width:100%;max-width:540px;aspect-ratio:4/3;border-radius:var(--r-lg);background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+    .m-bar{display:flex;align-items:center;gap:5px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)}.m-dot{width:9px;height:9px;border-radius:50%}.m-dot:nth-child(1){background:#ff5f57}.m-dot:nth-child(2){background:#febc2e}.m-dot:nth-child(3){background:#28c840}.m-url{flex:1;margin-left:10px;padding:4px 10px;border-radius:5px;background:var(--bg);font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+    .m-body{padding:1.5rem;display:flex;gap:1.2rem;height:calc(100% - 38px)}.m-side{width:50px;display:flex;flex-direction:column;gap:10px;padding-top:.5rem}.m-si{width:36px;height:36px;border-radius:var(--r-sm);background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.85rem}.m-si.on{background:var(--accent-g);border-color:var(--accent)}
+    .m-page{flex:1;background:var(--bg2);border-radius:var(--r);padding:1.2rem;border:1px solid var(--border);overflow:hidden}.m-ln{height:7px;border-radius:4px;margin-bottom:9px;opacity:.5}.m-ln.tl{width:55%;height:10px;background:var(--grad1);margin-bottom:.8rem;opacity:.7}.m-ln:nth-child(2){width:88%;background:var(--muted)}.m-ln:nth-child(3){width:72%;background:var(--muted)}.m-ln:nth-child(4){width:82%;background:var(--muted)}.m-ln:nth-child(5){width:58%;background:var(--muted)}.m-ln:nth-child(6){width:92%;background:var(--muted)}.m-ln:nth-child(7){width:68%;background:var(--muted)}
+    .m-tag{position:absolute;bottom:2.5rem;right:1.5rem;padding:6px 14px;border-radius:var(--r-sm);background:rgba(0,184,148,.12);border:1px solid rgba(0,184,148,.3);font-size:.7rem;color:var(--green);font-weight:600;animation:ft 3s ease-in-out infinite}@keyframes ft{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .hero-glow{position:absolute;width:120%;height:120%;top:-10%;left:-10%;background:radial-gradient(ellipse,var(--accent-g) 0%,transparent 55%);z-index:-1;animation:gp 5s ease-in-out infinite}@keyframes gp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.04)}}
+
+    .sec{padding:90px 2rem;position:relative}.sec-in{max-width:1140px;margin:0 auto}.sec-hd{text-align:center;margin-bottom:3.5rem}.sec-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 13px;border-radius:100px;background:var(--accent-g);border:1px solid rgba(108,92,231,.12);font-size:.7rem;font-weight:700;color:var(--accent-l);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem}.sec-t{font-size:clamp(1.9rem,3.2vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:.8rem}.sec-d{font-size:1rem;color:var(--fg2);max-width:560px;margin:0 auto;line-height:1.75}
+    .f-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}.f-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;transition:var(--ease);position:relative;overflow:hidden}.f-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad1);opacity:0;transition:var(--ease)}.f-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:var(--shadow)}.f-card:hover::before{opacity:1}.f-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1.1rem}.f-ico.p{background:rgba(108,92,231,.1);color:var(--accent-l)}.f-ico.t{background:rgba(0,206,201,.1);color:var(--teal)}.f-ico.pk{background:rgba(253,121,168,.1);color:var(--pink)}.f-ico.b{background:rgba(116,185,255,.1);color:#74b9ff}.f-ico.g{background:rgba(0,184,148,.1);color:var(--green)}.f-card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em}.f-card p{font-size:.84rem;color:var(--fg2);line-height:1.75}
+    .diff-sec{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.d-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}.d-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem;transition:var(--ease)}.d-card:hover{border-color:var(--border-h);transform:translateY(-2px)}.d-hd{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}.d-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}.d-ico.rm{background:rgba(255,95,87,.1);color:#ff5f57}.d-ico.ad{background:rgba(0,184,148,.1);color:var(--green)}.d-card h3{font-size:1.05rem;font-weight:700}.d-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}.d-list li{display:flex;align-items:flex-start;gap:.6rem;font-size:.85rem;color:var(--fg2);line-height:1.6}.d-list li .ic{flex-shrink:0;font-weight:700;margin-top:1px}.d-list li .ic.rm{color:#ff5f57}.d-list li .ic.ad{color:var(--green)}
+
+    .cta{text-align:center}.cta-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:3.5rem 3rem;position:relative;overflow:hidden}.cta-box::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse,var(--accent-g),transparent 50%);opacity:.25;pointer-events:none}.cta-box h2{font-size:clamp(1.7rem,2.8vw,2.3rem);font-weight:800;margin-bottom:.8rem;letter-spacing:-.03em;position:relative}.cta-box p{font-size:1rem;color:var(--fg2);margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto;position:relative}.cta-btns{display:flex;justify-content:center;gap:.85rem;flex-wrap:wrap;position:relative}
+    .footer{border-top:1px solid var(--border);padding:2.5rem 2rem}.footer-in{max-width:1140px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:.82rem;color:var(--muted)}.footer-l{display:flex;align-items:center;gap:8px}.footer-l svg{width:18px;height:18px}.footer a{color:var(--muted)}.footer a:hover{color:var(--accent-l)}
+    @keyframes fiu{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}.rv{opacity:0;transform:translateY(35px);transition:opacity .65s ease,transform .65s ease}.rv.vis{opacity:1;transform:translateY(0)}
+    @media(max-width:1024px){.hero-content{grid-template-columns:1fr;text-align:center;gap:3rem}.hero p{margin:0 auto 2rem}.hero-actions{justify-content:center}.hero-stats{justify-content:center}.f-grid{grid-template-columns:repeat(2,1fr)}.d-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){.nav-links{display:none}.mob-btn{display:flex}.hero{padding:100px 1.5rem 60px}.sec{padding:60px 1.5rem}.f-grid{grid-template-columns:1fr}.hero-mockup{max-width:100%}.hero-stats{gap:1.5rem}.cta-box{padding:2.5rem 1.5rem}}
+    @media(max-width:480px){.hero h1{font-size:1.9rem}.btn{padding:11px 18px;font-size:.85rem}.hero-actions{flex-direction:column;align-items:center}.hero-stats{flex-direction:column;align-items:center;gap:1rem}}
+  </style>
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true"><div class="orb"></div><div class="orb"></div></div>
+
+  <nav class="nav" role="navigation" aria-label="主导航">
+    <div class="nav-inner">
+      <a href="/readestl/" class="nav-logo" aria-label="Readest Lite 首页">
+        <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><path d="M8 10h4c2.2 0 4 1.8 4 4s-1.8 4-4 4H8V10z" stroke="#fff" stroke-width="2" fill="none"/><path d="M17 10c2.5 0 5 2 5 4s-2.5 4-5 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6c5ce7"/><stop offset="1" stop-color="#00cec9"/></linearGradient></defs></svg>
+        Readest <span class="lite">LITE</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">功能</a></li>
+        <li><a href="#diff">改动</a></li>
+        <li><a href="/readestl/deploy.html">部署</a></li>
+        <li><a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-btn" aria-label="切换主题" id="themeBtn">
+          <svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <a href="/readestl/deploy.html" class="btn-nav btn-nav-p">部署</a>
+        <button class="mob-btn" id="mobBtn" aria-label="菜单">&#9776;</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge"><span class="dot"></span>基于 Readest 二开 · 轻量自部署</div>
+        <h1>轻量自部署<br><span class="gt">阅读无界</span></h1>
+        <p>Readest Lite 基于 Readest 深度定制，去除付费体系与注册限制，保留全部核心功能。单容器 Docker 部署，数据完全自主，无限存储，持续迭代与原版功能对齐。</p>
+        <div class="hero-actions">
+          <a href="/readestl/deploy.html" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>一键部署</a>
+          <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a>
+        </div>
+        <div class="hero-stats">
+          <div><div class="stat-n">0</div><div class="stat-l">付费限制</div></div>
+          <div><div class="stat-n">&infin;</div><div class="stat-l">存储空间</div></div>
+          <div><div class="stat-n">1</div><div class="stat-l">Docker 容器</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-glow"></div>
+        <div class="hero-mockup">
+          <div class="m-bar"><div class="m-dot"></div><div class="m-dot"></div><div class="m-dot"></div><div class="m-url">localhost:8225</div></div>
+          <div class="m-body">
+            <div class="m-side"><div class="m-si">&#128218;</div><div class="m-si on">&#128214;</div><div class="m-si">&#127760;</div><div class="m-si">&#9881;</div></div>
+            <div class="m-page"><div class="m-ln tl"></div><div class="m-ln"></div><div class="m-ln"></div><div class="m-ln"></div><div class="m-ln"></div><div class="m-ln"></div><div class="m-ln"></div></div>
+          </div>
+          <div class="m-tag">全部功能已开放</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="features">
+    <div class="sec-in">
+      <div class="sec-hd rv"><div class="sec-tag">核心功能</div><h2 class="sec-t">保留原版全部核心能力</h2><p class="sec-d">与 Readest 功能持续对齐，所有原版 Pro 专属功能无条件开放。</p></div>
+      <div class="f-grid">
+        <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>多格式阅读</h3><p>原生支持 EPUB、PDF、MOBI、AZW3 等主流电子书格式，无需转换直接打开，自动适配最佳排版。</p></article>
+        <article class="f-card rv"><div class="f-ico t">&#128421;</div><h3>分屏阅读</h3><p>原版 Pro 功能，现无条件开放。支持双屏对照阅读，左原文右译文，或同时参考两本书。</p></article>
+        <article class="f-card rv"><div class="f-ico b">&#127908;</div><h3>TTS 朗读</h3><p>原版 Pro 功能，现无条件开放。内置高质量语音合成，多语种多音色，可调语速音调。</p></article>
+        <article class="f-card rv"><div class="f-ico pk">&#9729;</div><h3>云端同步</h3><p>阅读进度、批注、书签自动同步，多端无缝切换。同步协议完全兼容原版前端逻辑。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#9997;</div><h3>无限批注与导出</h3><p>原版 Pro 功能，现无条件开放。高亮、划线、笔记一应俱全，支持导出 Markdown 或纯文本。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>无限存储</h3><p>移除所有存储容量与文件数量限制，书籍文件、封面图无限存储于本地挂载卷，数据完全自主。</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec diff-sec" id="diff">
+    <div class="sec-in">
+      <div class="sec-hd rv"><div class="sec-tag">改动明细</div><h2 class="sec-t">只做减法，不加戏</h2><p class="sec-d">严格遵循最小化改动原则：删除付费体系与注册限制，其余逻辑原封不动保留。</p></div>
+      <div class="d-grid">
+        <article class="d-card rv">
+          <div class="d-hd"><div class="d-ico rm">&#10005;</div><h3>已移除</h3></div>
+          <ul class="d-list">
+            <li><span class="ic rm">&#8722;</span>Pro 付费体系、定价页、订阅页、支付页面</li>
+            <li><span class="ic rm">&#8722;</span>所有升级弹窗、Pro 标识徽章、升级入口</li>
+            <li><span class="ic rm">&#8722;</span>isPro / checkPro / requirePro 校验代码</li>
+            <li><span class="ic rm">&#8722;</span>注册功能入口，仅保留单管理员账号登录</li>
+            <li><span class="ic rm">&#8722;</span>存储容量限制、文件数量限制</li>
+            <li><span class="ic rm">&#8722;</span>Supabase Auth 依赖，替换为本地鉴权</li>
+            <li><span class="ic rm">&#8722;</span>Supabase Postgres 依赖，替换为 SQLite</li>
+            <li><span class="ic rm">&#8722;</span>对象存储依赖，替换为本地文件系统</li>
+          </ul>
+        </article>
+        <article class="d-card rv">
+          <div class="d-hd"><div class="d-ico ad">&#10003;</div><h3>保留 / 新增</h3></div>
+          <ul class="d-list">
+            <li><span class="ic ad">&#43;</span>全部阅读器内核、UI 交互、同步逻辑原封不动</li>
+            <li><span class="ic ad">&#43;</span>原 Pro 功能（分屏、TTS、导出批注）全部开放</li>
+            <li><span class="ic ad">&#43;</span>无限存储，无容量与文件数限制</li>
+            <li><span class="ic ad">&#43;</span>单管理员账号，密码通过环境变量指定</li>
+            <li><span class="ic ad">&#43;</span>SQLite + Prisma 替代 Postgres，数据完全自主</li>
+            <li><span class="ic ad">&#43;</span>本地文件系统替代对象存储，书籍存于 /data/books</li>
+            <li><span class="ic ad">&#43;</span>全部 API 契约 1:1 复刻，前端零修改可对接</li>
+            <li><span class="ic ad">&#43;</span>单 Docker 镜像，端口 8225，数据卷持久化</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec cta">
+    <div class="sec-in">
+      <div class="cta-box rv">
+        <h2>数据自主，功能全开</h2>
+        <p>Readest Lite —— 去除一切限制，只保留纯粹的阅读体验。</p>
+        <div class="cta-btns">
+          <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub 仓库</a>
+          <a href="/readestl/deploy.html" class="btn btn-s">部署教程</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-in">
+      <div class="footer-l"><svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#fg2)"/><path d="M8 10h4c2.2 0 4 1.8 4 4s-1.8 4-4 4H8V10z" stroke="#fff" stroke-width="2" fill="none"/><path d="M17 10c2.5 0 5 2 5 4s-2.5 4-5 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="fg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6c5ce7"/><stop offset="1" stop-color="#00cec9"/></linearGradient></defs></svg>&copy; 2024-2026 Readest Lite &middot; Based on <a href="https://github.com/readest/readest" target="_blank" rel="noopener noreferrer">Readest</a> &middot; AGPL-3.0</div>
+      <div style="display:flex;gap:1.5rem"><a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/readest/readest" target="_blank" rel="noopener noreferrer">原项目</a></div>
+    </div>
+  </footer>
+
+  <script>
+    var sunP='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    var moonP='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeIcon').innerHTML=t==='light'?moonP:sunP;try{localStorage.setItem('rl-theme',t)}catch(e){}}
+    (function(){var s=null;try{s=localStorage.getItem('rl-theme')}catch(e){}var p=window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';applyTheme(s||p)})();
+    document.getElementById('themeBtn').addEventListener('click',function(){var c=document.documentElement.getAttribute('data-theme');applyTheme(c==='light'?'dark':'light')});
+    var nv=document.querySelector('.nav');window.addEventListener('scroll',function(){nv.classList.toggle('scrolled',window.scrollY>16)},{passive:true});
+    var ro=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('vis');ro.unobserve(e.target)}})},{threshold:.08,rootMargin:'0px 0px -40px 0px'});document.querySelectorAll('.rv').forEach(function(el){ro.observe(el)});
+    var mb=document.getElementById('mobBtn'),nl=document.querySelector('.nav-links');mb.addEventListener('click',function(){var o=nl.style.display==='flex';if(o){nl.style.display='none'}else{nl.style.display='flex';nl.style.cssText+='flex-direction:column;position:absolute;top:68px;right:1rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;box-shadow:var(--shadow);z-index:999'}});
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+  </script>
+</body>
+</html>

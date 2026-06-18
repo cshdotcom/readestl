@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>部署教程 — Readest Lite</title>
+  <meta name="description" content="Readest Lite 部署教程：Docker 一键部署、环境变量、数据持久化、反向代理、升级与常见问题。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://cshdotcom.github.io/readestl/deploy.html">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#07070c;--bg2:#0d0d14;--card:#12121b;--card-h:#181824;--code-bg:#0a0a14;--fg:#eeeef4;--fg2:#8e8ea6;--muted:#555570;--accent:#6c5ce7;--accent-l:#a29bfe;--accent-g:rgba(108,92,231,.25);--teal:#00cec9;--green:#00b894;--red:#ff5f57;--yellow:#fdcb6e;--grad1:linear-gradient(135deg,#6c5ce7,#a29bfe);--grad3:linear-gradient(135deg,#6c5ce7,#00cec9);--border:rgba(255,255,255,.05);--border-h:rgba(255,255,255,.1);--r:14px;--r-sm:8px;--ease:.3s cubic-bezier(.4,0,.2,1);--sans:'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono','Fira Code',monospace}
+    html[data-theme="light"]{--bg:#fafafe;--bg2:#f2f2f8;--card:#fff;--card-h:#f5f5fa;--code-bg:#f4f4fb;--fg:#1a1a2e;--fg2:#5f5f78;--muted:#9494a8;--accent-g:rgba(108,92,231,.12);--border:rgba(0,0,0,.05);--border-h:rgba(0,0,0,.1)}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}::selection{background:var(--accent);color:#fff}a{color:var(--accent-l);text-decoration:none;transition:var(--ease)}a:hover{color:var(--accent)}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
+
+    .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 2rem;transition:background .3s,border-color .3s,backdrop-filter .3s;border-bottom:1px solid transparent}.nav.scrolled{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(7,7,12,.85);border-bottom-color:var(--border)}html[data-theme="light"] .nav.scrolled{background:rgba(250,250,254,.88)}
+    .nav-inner{max-width:800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.3rem;color:var(--fg);letter-spacing:-.02em}.nav-logo svg{width:30px;height:30px}.nav-logo .lite{font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--grad3);color:#fff;margin-left:2px}
+    .nav-actions{display:flex;align-items:center;gap:.6rem}.theme-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--fg2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--ease)}.theme-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-g)}.theme-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    .wrap{max-width:800px;margin:0 auto;padding:100px 2rem 60px}
+
+    h1{font-size:clamp(1.8rem,3.5vw,2.4rem);font-weight:900;letter-spacing:-.03em;margin-bottom:.5rem;line-height:1.2}h1 .gt{background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .subtitle{color:var(--fg2);font-size:.95rem;margin-bottom:2.5rem;line-height:1.7}
+
+    /* TOC - minimal */
+    .toc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem 1.5rem;margin-bottom:3rem;display:flex;flex-wrap:wrap;gap:.4rem .5rem;align-items:center}
+    .toc-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-l);margin-right:.5rem}
+    .toc a{font-size:.82rem;color:var(--fg2);padding:3px 10px;border-radius:100px;border:1px solid var(--border);font-weight:500;transition:var(--ease)}.toc a:hover{border-color:var(--accent);color:var(--accent-l);background:var(--accent-g)}
+
+    /* Sections */
+    .sec{margin-bottom:3rem;scroll-margin-top:80px}
+    .sec h2{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+    .sec h3{font-size:1.05rem;font-weight:700;margin:1.5rem 0 .5rem}
+    .sec p{color:var(--fg2);font-size:.9rem;line-height:1.85;margin-bottom:.8rem}
+    .sec ul,.sec ol{color:var(--fg2);font-size:.9rem;line-height:1.85;margin-bottom:.8rem;padding-left:1.4rem}
+    .sec li{margin-bottom:.25rem}
+
+    /* Code */
+    pre{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:1rem 1.2rem;font-family:var(--mono);font-size:.78rem;line-height:1.8;color:var(--fg2);overflow-x:auto;margin-bottom:1rem;position:relative}
+    pre .cm{color:var(--muted)}pre .k{color:var(--accent-l)}pre .f{color:var(--teal)}pre .v{color:var(--pink)}pre .s{color:var(--green)}
+    .cbtn{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:var(--ease);opacity:0}pre:hover .cbtn{opacity:1}.cbtn:hover{border-color:var(--accent);color:var(--accent)}
+    code{font-family:var(--mono);font-size:.82em;background:var(--code-bg);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:var(--accent-l)}
+
+    /* Table */
+    table{width:100%;border-collapse:collapse;font-size:.85rem;margin-bottom:1rem}
+    th{text-align:left;padding:.6rem .8rem;background:var(--bg2);border:1px solid var(--border);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--fg)}
+    td{padding:.55rem .8rem;border:1px solid var(--border);color:var(--fg2);vertical-align:top}
+    td:first-child{font-family:var(--mono);color:var(--accent-l);white-space:nowrap}
+    .req{color:var(--red);font-size:.7rem;font-weight:600}.opt{color:var(--muted);font-size:.7rem}
+
+    /* Note box */
+    .note{border-left:3px solid var(--accent);background:var(--card);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:.8rem 1rem;margin-bottom:1rem;font-size:.85rem;color:var(--fg2);line-height:1.7}
+    .note.warn{border-left-color:var(--yellow)}.note.tip{border-left-color:var(--green)}
+
+    /* File tree */
+    .tree{background:var(--code-bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:1rem 1.2rem;font-family:var(--mono);font-size:.76rem;line-height:2;color:var(--fg2);margin-bottom:1rem;overflow-x:auto}
+    .tree .d{color:var(--accent-l);font-weight:600}.tree .c{color:var(--muted);font-size:.7rem;margin-left:.4rem}
+
+    .footer{border-top:1px solid var(--border);padding:2rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;font-size:.8rem;color:var(--muted)}.footer a{color:var(--muted)}.footer a:hover{color:var(--accent-l)}
+
+    @media(max-width:640px){.wrap{padding:90px 1.5rem 40px}table{font-size:.78rem}td,th{padding:.4rem .5rem}}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/readestl/" class="nav-logo">
+        <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><path d="M8 10h4c2.2 0 4 1.8 4 4s-1.8 4-4 4H8V10z" stroke="#fff" stroke-width="2" fill="none"/><path d="M17 10c2.5 0 5 2 5 4s-2.5 4-5 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6c5ce7"/><stop offset="1" stop-color="#00cec9"/></linearGradient></defs></svg>
+        Readest <span class="lite">LITE</span>
+      </a>
+      <div class="nav-actions">
+        <a href="/readestl/" style="font-size:.85rem;color:var(--fg2)">&larr; 首页</a>
+        <button class="theme-btn" id="themeBtn"><svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <h1>部署 <span class="gt">教程</span></h1>
+    <p class="subtitle">5 分钟完成部署，从 Docker 安装到上线运行，按顺序跟做即可。</p>
+
+    <nav class="toc">
+      <span class="toc-label">目录</span>
+      <a href="#prereq">环境准备</a>
+      <a href="#quick">快速开始</a>
+      <a href="#compose">Compose 部署</a>
+      <a href="#env">环境变量</a>
+      <a href="#data">数据持久化</a>
+      <a href="#proxy">反向代理</a>
+      <a href="#upgrade">升级</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+
+    <section class="sec" id="prereq">
+      <h2>环境准备</h2>
+      <p>只需要 Docker，无需安装 Node.js 或数据库。</p>
+      <ul>
+        <li><strong>系统</strong>：Linux / macOS / Windows (WSL2)</li>
+        <li><strong>Docker</strong>：20.10+ 及 Compose V2</li>
+        <li><strong>内存</strong>：最低 512MB，推荐 1GB+</li>
+        <li><strong>端口</strong>：默认 8225（可改）</li>
+      </ul>
+      <h3>安装 Docker</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="cm"># 一键安装 Docker</span>
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+sudo systemctl enable --now docker
+
+<span class="cm"># 验证</span>
+docker --version</pre>
+      <div class="note">安装后需<strong>重新登录终端</strong>或执行 <code>newgrp docker</code> 使权限生效。macOS 推荐 Docker Desktop。</div>
+    </section>
+
+    <section class="sec" id="quick">
+      <h2>快速开始</h2>
+      <p>一条命令拉起，30 秒后访问 <code>http://localhost:8225</code>。</p>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button>docker run -d \
+  --name readest-lite \
+  -p 8225:8225 \
+  -v readest-data:/data \
+  -e ADMIN_EMAIL=admin@example.com \
+  -e ADMIN_PASSWORD=changeme \
+  cshdotcom/readest-lite:latest</pre>
+      <div class="note warn">请务必修改默认密码，生产环境使用 16 位以上随机字符串。</div>
+    </section>
+
+    <section class="sec" id="compose">
+      <h2>Docker Compose 部署（推荐）</h2>
+      <p>配置清晰、升级方便、重启自动恢复，适合长期运行。</p>
+
+      <h3>docker-compose.yml</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="k">version</span>: <span class="v">"3.8"</span>
+<span class="k">services</span>:
+  <span class="k">readest-lite</span>:
+    <span class="k">image</span>: <span class="v">cshdotcom/readest-lite:latest</span>
+    <span class="k">container_name</span>: <span class="v">readest-lite</span>
+    <span class="k">restart</span>: <span class="v">unless-stopped</span>
+    <span class="k">ports</span>:
+      - <span class="v">"${PORT:-8225}:8225"</span>
+    <span class="k">volumes</span>:
+      - <span class="v">./data:/data</span>
+    <span class="k">environment</span>:
+      - <span class="f">ADMIN_EMAIL</span>=<span class="v">${ADMIN_EMAIL}</span>
+      - <span class="f">ADMIN_PASSWORD</span>=<span class="v">${ADMIN_PASSWORD}</span></pre>
+
+      <h3>.env</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="f">ADMIN_EMAIL</span>=<span class="v">admin@example.com</span>
+<span class="f">ADMIN_PASSWORD</span>=<span class="v">your-secure-password</span>
+<span class="f">PORT</span>=<span class="v">8225</span></pre>
+
+      <h3>常用命令</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button>docker compose up -d       <span class="cm"># 启动</span>
+docker compose ps           <span class="cm"># 状态</span>
+docker compose logs -f      <span class="cm"># 日志</span>
+docker compose down          <span class="cm"># 停止</span></pre>
+
+      <div class="note tip"><code>restart: unless-stopped</code> 确保容器在 Docker 重启或意外退出后自动恢复。</div>
+    </section>
+
+    <section class="sec" id="env">
+      <h2>环境变量</h2>
+      <p>容器启动时读取，修改后需重启生效。</p>
+      <table>
+        <thead><tr><th>变量</th><th>必填</th><th>默认</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>ADMIN_EMAIL</td><td><span class="req">必填</span></td><td>—</td><td>管理员邮箱，首次启动自动创建账号</td></tr>
+          <tr><td>ADMIN_PASSWORD</td><td><span class="req">必填</span></td><td>—</td><td>管理员密码，建议 16+ 位随机字符串</td></tr>
+          <tr><td>PORT</td><td><span class="opt">可选</span></td><td>8225</td><td>容器内监听端口，一般不需修改</td></tr>
+        </tbody>
+      </table>
+      <div class="note">将 <code>.env</code> 加入 <code>.gitignore</code>，避免密码泄露到版本控制。</div>
+    </section>
+
+    <section class="sec" id="data">
+      <h2>数据持久化</h2>
+      <p>所有数据存储在容器 <code>/data</code> 目录，通过卷挂载确保容器重建不丢失。</p>
+
+      <h3>目录结构</h3>
+<div class="tree"><span class="d">data/</span>
+├── <span class="d">db/</span>             <span class="c">SQLite 数据库</span>
+│   └── readest.db  <span class="c">用户、书籍、进度、批注</span>
+├── <span class="d">books/</span>           <span class="c">书籍文件</span>
+│   ├── <span class="d">uploads/</span>   <span class="c">上传的电子书</span>
+│   └── <span class="d">covers/</span>    <span class="c">自动生成的封面</span>
+└── config.json     <span class="c">运行时配置（自动生成）</span></div>
+
+      <h3>备份</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="cm"># 停止容器后打包</span>
+tar czf readest-backup-$(date +%Y%m%d).tar.gz data/
+
+<span class="cm"># 保留最近 30 天</span>
+find . -name "readest-backup-*.tar.gz" -mtime +30 -delete</pre>
+      <div class="note warn">备份前建议先停止容器，避免 SQLite 在写入中被打包出损坏的文件。</div>
+    </section>
+
+    <section class="sec" id="proxy">
+      <h2>反向代理</h2>
+      <p>生产环境推荐通过反向代理暴露到公网，并配置 HTTPS。</p>
+
+      <h3>Nginx</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="k">server</span> {
+    <span class="k">listen</span> <span class="v">443 ssl http2</span>;
+    <span class="k">server_name</span> <span class="v">read.yourdomain.com</span>;
+
+    <span class="k">ssl_certificate</span>     <span class="v">/path/to/fullchain.pem</span>;
+    <span class="k">ssl_certificate_key</span> <span class="v">/path/to/privkey.pem</span>;
+
+    <span class="k">location</span> / {
+        <span class="k">proxy_pass</span> <span class="v">http://127.0.0.1:8225</span>;
+        <span class="k">proxy_set_header</span> Host <span class="v">$host</span>;
+        <span class="k">proxy_set_header</span> X-Real-IP <span class="v">$remote_addr</span>;
+        <span class="k">proxy_set_header</span> X-Forwarded-Proto <span class="v">$scheme</span>;
+
+        <span class="cm"># WebSocket（同步功能必需）</span>
+        <span class="k">proxy_http_version</span> <span class="v">1.1</span>;
+        <span class="k">proxy_set_header</span> Upgrade <span class="v">$http_upgrade</span>;
+        <span class="k">proxy_set_header</span> Connection <span class="v">"upgrade"</span>;
+        <span class="k">proxy_read_timeout</span> <span class="v">86400</span>;
+    }
+}</pre>
+
+      <h3>Caddy（更简单）</h3>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="v">read.yourdomain.com</span> {
+    <span class="k">reverse_proxy</span> <span class="v">localhost:8225</span>
+}</pre>
+      <div class="note tip">Caddy 自动申请和续期 HTTPS 证书，零配置。确保域名 DNS 已解析到服务器且 80/443 端口开放。</div>
+    </section>
+
+    <section class="sec" id="upgrade">
+      <h2>升级更新</h2>
+      <p>定期升级获取最新功能与修复，数据不受影响。</p>
+<pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="cm"># 拉取最新镜像</span>
+docker compose pull
+
+<span class="cm"># 重建容器（数据在 ./data 不受影响）</span>
+docker compose up -d
+
+<span class="cm"># 清理旧镜像</span>
+docker image prune -f</pre>
+      <div class="note">启动时自动检测数据库版本并执行迁移，无需手动操作。</div>
+    </section>
+
+    <section class="sec" id="faq">
+      <h2>常见问题</h2>
+
+      <h3>启动后无法访问？</h3>
+      <ol>
+        <li><code>docker ps</code> 确认容器状态为 <code>Up</code></li>
+        <li><code>curl http://localhost:8225</code> 在服务器本地测试</li>
+        <li>检查防火墙：<code>sudo ufw allow 8225</code></li>
+        <li><code>docker logs readest-lite</code> 查看错误日志</li>
+      </ol>
+
+      <h3>如何修改密码？</h3>
+      <p>修改 <code>.env</code> 中的 <code>ADMIN_PASSWORD</code>，然后 <code>docker compose down && docker compose up -d</code>。</p>
+
+      <h3>如何换端口？</h3>
+      <p>修改 <code>docker-compose.yml</code> 端口映射：<code>"9000:8225"</code>（左边是对外端口）。</p>
+
+      <h3>书籍存在哪里？</h3>
+      <p><code>data/books/uploads/</code> 存书籍原文，<code>data/books/covers/</code> 存封面图，容器重建不丢失。</p>
+
+      <h3>支持多用户吗？</h3>
+      <p>当前仅支持单管理员账号。如需多用户，欢迎在 <a href="https://github.com/cshdotcom/readest-lite/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a> 讨论。</p>
+
+      <h3>如何迁移数据？</h3>
+      <p>直接复制整个 <code>data/</code> 目录到新服务器，用相同参数启动容器即可。SQLite 文件可跨平台使用。</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>&copy; 2024-2026 Readest Lite</span>
+    <a href="/readestl/">&larr; 返回首页</a>
+  </footer>
+
+  <script>
+    var sunP='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    var moonP='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeIcon').innerHTML=t==='light'?moonP:sunP;try{localStorage.setItem('rl-theme',t)}catch(e){}}
+    (function(){var s=null;try{s=localStorage.getItem('rl-theme')}catch(e){}var p=window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';applyTheme(s||p)})();
+    document.getElementById('themeBtn').addEventListener('click',function(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light')});
+    var nv=document.querySelector('.nav');window.addEventListener('scroll',function(){nv.classList.toggle('scrolled',window.scrollY>16)},{passive:true});
+    function cp(b){var t=b.parentElement.textContent.replace(/^\s*\n/,'').trimEnd();navigator.clipboard.writeText(t).then(function(){b.textContent='\u2713';setTimeout(function(){b.textContent='\u2298'},1e3)})}
+  </script>
+</body>
+</html>
