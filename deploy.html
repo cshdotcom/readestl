@@ -92,6 +92,7 @@
       <a href="#data">数据持久化</a>
       <a href="#proxy">反向代理</a>
       <a href="#upgrade">升级</a>
+      <a href="#multiuser">多用户</a>
       <a href="#faq">常见问题</a>
     </nav>
 
@@ -145,12 +146,20 @@ docker --version</pre>
       - <span class="v">./data:/data</span>
     <span class="k">environment</span>:
       - <span class="f">ADMIN_EMAIL</span>=<span class="v">${ADMIN_EMAIL}</span>
-      - <span class="f">ADMIN_PASSWORD</span>=<span class="v">${ADMIN_PASSWORD}</span></pre>
+      - <span class="f">ADMIN_PASSWORD</span>=<span class="v">${ADMIN_PASSWORD}</span>
+      - <span class="f">PUBLIC_BASE_URL</span>=<span class="v">${PUBLIC_BASE_URL:-}</span>
+      - <span class="f">DEEPL_ENABLED</span>=<span class="v">${DEEPL_ENABLED:-false}</span></pre>
 
       <h3>.env</h3>
 <pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="f">ADMIN_EMAIL</span>=<span class="v">admin@example.com</span>
 <span class="f">ADMIN_PASSWORD</span>=<span class="v">your-secure-password</span>
-<span class="f">PORT</span>=<span class="v">8225</span></pre>
+<span class="f">PORT</span>=<span class="v">8225</span>
+<span class="cm"># 可选：反向代理场景必填</span>
+<span class="f">PUBLIC_BASE_URL</span>=<span class="v">https://read.yourdomain.com</span>
+<span class="cm"># 可选：翻译功能（默认关闭）</span>
+<span class="f">DEEPL_ENABLED</span>=<span class="v">false</span>
+<span class="f">DEEPL_FREE_API_KEYS</span>=<span class="v"></span>
+<span class="f">DEEPL_PRO_API_KEYS</span>=<span class="v"></span></pre>
 
       <h3>常用命令</h3>
 <pre><button class="cbtn" onclick="cp(this)">&#9112;</button>docker compose up -d       <span class="cm"># 启动</span>
@@ -244,6 +253,20 @@ docker image prune -f</pre>
       <div class="note">启动时自动检测数据库版本并执行迁移，无需手动操作。</div>
     </section>
 
+    <section class="sec" id="multiuser">
+      <h2>多用户管理</h2>
+      <p>管理员可以在用户中心创建和管理普通用户。</p>
+      <h3>创建用户</h3>
+      <ol>
+        <li>管理员登录后进入「用户中心」</li>
+        <li>在「用户管理」面板点击「新建用户」</li>
+        <li>填写邮箱、密码、显示名称</li>
+        <li>设置存储配额（MB）和翻译配额（KB），0 = 无限</li>
+        <li>点击创建，用户即可用邮箱密码登录</li>
+      </ol>
+      <div class="note tip">普通用户登录后看不到用户管理面板，只能查看自己的账号信息。管理员可以编辑任何用户的密码、名称和配额，也可以删除非管理员用户。</div>
+    </section>
+
     <section class="sec" id="faq">
       <h2>常见问题</h2>
 
@@ -265,7 +288,16 @@ docker image prune -f</pre>
       <p><code>data/books/uploads/</code> 存书籍原文，<code>data/books/covers/</code> 存封面图，容器重建不丢失。</p>
 
       <h3>支持多用户吗？</h3>
-      <p>当前仅支持单管理员账号。如需多用户，欢迎在 <a href="https://github.com/cshdotcom/readest-lite/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a> 讨论。</p>
+      <p>支持！管理员登录后在「用户中心」可以看到「用户管理」面板，可以创建普通用户、设置用户名密码、分配存储和翻译配额。普通用户登录后只能看到自己的账号信息，没有管理权限。</p>
+
+      <h3>如何使用远程下载？</h3>
+      <p>在书库页面点击「导入」→「Download from URL」，输入书籍直链地址（如 <code>https://example.com/book.epub</code>），服务器会自动下载并添加到你的书架。</p>
+
+      <h3>翻译和词典需要加速器吗？</h3>
+      <p>不需要。Google 翻译、Wikipedia、Wiktionary 都通过服务器代理访问。只要服务器能访问 Google（如国外 VPS），客户端无需加速器即可使用。</p>
+
+      <h3>如何启用 DeepL 翻译？</h3>
+      <p>在 <code>.env</code> 中设置 <code>DEEPL_ENABLED=true</code> 和 <code>DEEPL_FREE_API_KEYS</code> 或 <code>DEEPL_PRO_API_KEYS</code>，重启容器即可。</p>
 
       <h3>如何迁移数据？</h3>
       <p>直接复制整个 <code>data/</code> 目录到新服务器，用相同参数启动容器即可。SQLite 文件可跨平台使用。</p>
