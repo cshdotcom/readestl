@@ -1,0 +1,602 @@
+   120→+**Symptom:** a fixed set of books stayed pinned at the top of a `updatedAt`-desc ("date read") library. Reading/closing another book moved it to front, but the next cloud sync floated those books back above it. Gone after logout → caused by the sync round-trip.
+   121→+
+   122→+**Root cause** (`src/pages/api/sync.ts` POST handler, books branch ~line 422): when a pushed book is NOT newer than the server (`clientIsNewer` false), it rewrites `updated_at = new Date().toISOString()` if `statusChanged`. The check was `status.reading_status !== serverBook.reading_status`. A locally-imported book that never got a status sends `reading_status: undefined` (dropped by `JSON.stringify`); the server stores `null`. `undefined !== null` ⇒ true ⇒ spurious rewrite. The rewrite re-writes `undefined` (→ stays `null`), so it NEVER converges. Discriminator is purely client-side: books that round-tripped through a PULL have `readingStatus: null` (set by `transformBookFromDB`) and don't trigger it; never-pulled imports keep `undefined`.
+   123→+
+   124→+**Amplifiers:** (1) the 1-day re-sync window (`useSync.ts:98` `lastSyncedAtBooks = stored - ONE_DAY_IN_MS`) re-pushes every recently-touched book each sync. (2) the rewrite runs in one batch `upsert` transaction → all affected rows get the SAME `now()` ⇒ identical-to-the-ms timestamps (the tell-tale signature).
+   125→+
+   126→+**Fix:** `readingStatusChanged(a,b) = (a ?? null) !== (b ?? null)` — treat undefined/null both as "no status". Existing inflated timestamps age out naturally; no migration. NOT a DB trigger (Alice kept her config time, proving the app writes the value).
+   127→+
+   128→+**CDP verification recipe (Xiaomi, on-device):** the `pnpm dev-android` build = release APK with `--features devtools` → WebView debugging on → `tauri.localhost` + `webview_devtools_remote_<pid>` socket. Discover socket from `/proc/net/unix`, `adb forward tcp:PORT localabstract:<sock>`, drive via Node 24 native `WebSocket` to `/json/list` page target. The page can call `fetch('https://web.readest.com/api/sync?since=0&type=books', {Authorization: Bearer <localStorage token>})` directly to read cloud `updated_at` per book. Decisive evidence = compare in-app `PUSH_SENT` (client sends old ts) vs `PUSH_RETURNED` (server returns fresh identical `now()`) for the statusless books only. Console object args replay as `Array(N)` previews with stale objectIds — log pre-stringified JSON and/or stash into a `window.__SYNCDBG` ring buffer read via `Runtime.evaluate(returnByValue)`. Related: [[android-cdp-e2e-lane]], [[cdp-android-webview-profiling]]. Touches #4634 reading-status field-level merge.
+   129→diff --git a/apps/readest-app/public/locales/ar/translation.json b/apps/readest-app/public/locales/ar/translation.json
+   130→index 9d209d051b..3712c4b154 100644
+   131→--- a/apps/readest-app/public/locales/ar/translation.json
+   132→+++ b/apps/readest-app/public/locales/ar/translation.json
+   133→@@ -1907,5 +1907,10 @@
+   134→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "أظهر تلميحًا قصيرًا بلغتك الأم فوق الكلمات الصعبة. الكلمات التي تفوق مستواك تحصل على تلميح.",
+   135→   "Level": "المستوى",
+   136→   "CEFR level": "مستوى CEFR",
+   137→-  "Webtoon Mode": "وضع الويبتون"
+   138→+  "Webtoon Mode": "وضع الويبتون",
+   139→+  "Image saved successfully": "تم حفظ الصورة بنجاح",
+   140→+  "Failed to save the image": "فشل حفظ الصورة",
+   141→+  "Share Image": "مشاركة الصورة",
+   142→+  "Save Image": "حفظ الصورة",
+   143→+  "Image saved to gallery": "تم حفظ الصورة في المعرض"
+   144→ }
+   145→diff --git a/apps/readest-app/public/locales/bn/translation.json b/apps/readest-app/public/locales/bn/translation.json
+   146→index 8ce3fe28ea..a6b6765007 100644
+   147→--- a/apps/readest-app/public/locales/bn/translation.json
+   148→+++ b/apps/readest-app/public/locales/bn/translation.json
+   149→@@ -1775,5 +1775,10 @@
+   150→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "কঠিন শব্দের উপরে আপনার মাতৃভাষায় একটি সংক্ষিপ্ত ইঙ্গিত দেখান। আপনার স্তরের উপরের শব্দগুলো একটি ইঙ্গিত পায়।",
+   151→   "Level": "স্তর",
+   152→   "CEFR level": "CEFR স্তর",
+   153→-  "Webtoon Mode": "ওয়েবটুন মোড"
+   154→+  "Webtoon Mode": "ওয়েবটুন মোড",
+   155→+  "Image saved successfully": "ছবি সফলভাবে সংরক্ষিত হয়েছে",
+   156→+  "Failed to save the image": "ছবি সংরক্ষণ করা যায়নি",
+   157→+  "Share Image": "ছবি শেয়ার করুন",
+   158→+  "Save Image": "ছবি সংরক্ষণ করুন",
+   159→+  "Image saved to gallery": "ছবি গ্যালারিতে সংরক্ষিত হয়েছে"
+   160→ }
+   161→diff --git a/apps/readest-app/public/locales/bo/translation.json b/apps/readest-app/public/locales/bo/translation.json
+   162→index 53a5d5848d..6fb44f003a 100644
+   163→--- a/apps/readest-app/public/locales/bo/translation.json
+   164→+++ b/apps/readest-app/public/locales/bo/translation.json
+   165→@@ -1742,5 +1742,10 @@
+   166→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "ཚིག་དཀའ་མོའི་སྟེང་དུ་རང་གི་སྐད་ཡིག་ཐོག་ནས་བརྡ་སྟོན་ཐུང་ངུ་ཞིག་སྟོན། ཁྱེད་ཀྱི་རིམ་པ་ལས་མཐོ་བའི་ཚིག་ལ་བརྡ་སྟོན་ཐོབ།",
+   167→   "Level": "རིམ་པ།",
+   168→   "CEFR level": "CEFR རིམ་པ།",
+   169→-  "Webtoon Mode": "Webtoon སྤྱོད་ཚུལ།"
+   170→+  "Webtoon Mode": "Webtoon སྤྱོད་ཚུལ།",
+   171→+  "Image saved successfully": "པར་རིས་ཉར་ཚགས་ལེགས་གྲུབ་བྱུང་",
+   172→+  "Failed to save the image": "པར་རིས་ཉར་ཚགས་བྱས་མ་ཐུབ",
+   173→+  "Share Image": "པར་རིས་མཉམ་སྤྱོད།",
+   174→+  "Save Image": "པར་རིས་ཉར་ཚགས།",
+   175→+  "Image saved to gallery": "པར་རིས་པར་མཛོད་ནང་ཉར་ཚགས་བྱས་ཟིན"
+   176→ }
+   177→diff --git a/apps/readest-app/public/locales/de/translation.json b/apps/readest-app/public/locales/de/translation.json
+   178→index 7d9b4091e6..fe8dec5322 100644
+   179→--- a/apps/readest-app/public/locales/de/translation.json
+   180→+++ b/apps/readest-app/public/locales/de/translation.json
+   181→@@ -1775,5 +1775,10 @@
+   182→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Zeigt einen kurzen Hinweis in deiner Muttersprache über schwierigen Wörtern an. Wörter über deinem Niveau erhalten einen Hinweis.",
+   183→   "Level": "Niveau",
+   184→   "CEFR level": "CEFR-Niveau",
+   185→-  "Webtoon Mode": "Webtoon-Modus"
+   186→+  "Webtoon Mode": "Webtoon-Modus",
+   187→+  "Image saved successfully": "Bild erfolgreich gespeichert",
+   188→+  "Failed to save the image": "Bild konnte nicht gespeichert werden",
+   189→+  "Share Image": "Bild teilen",
+   190→+  "Save Image": "Bild speichern",
+   191→+  "Image saved to gallery": "Bild in der Galerie gespeichert"
+   192→ }
+   193→diff --git a/apps/readest-app/public/locales/el/translation.json b/apps/readest-app/public/locales/el/translation.json
+   194→index d7b9487400..30f856c3a0 100644
+   195→--- a/apps/readest-app/public/locales/el/translation.json
+   196→+++ b/apps/readest-app/public/locales/el/translation.json
+   197→@@ -1775,5 +1775,10 @@
+   198→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Εμφανίζει μια σύντομη υπόδειξη στη μητρική σου γλώσσα πάνω από δύσκολες λέξεις. Οι λέξεις πάνω από το επίπεδό σου λαμβάνουν υπόδειξη.",
+   199→   "Level": "Επίπεδο",
+   200→   "CEFR level": "Επίπεδο CEFR",
+   201→-  "Webtoon Mode": "Λειτουργία webtoon"
+   202→+  "Webtoon Mode": "Λειτουργία webtoon",
+   203→+  "Image saved successfully": "Η εικόνα αποθηκεύτηκε με επιτυχία",
+   204→+  "Failed to save the image": "Αποτυχία αποθήκευσης της εικόνας",
+   205→+  "Share Image": "Κοινή χρήση εικόνας",
+   206→+  "Save Image": "Αποθήκευση εικόνας",
+   207→+  "Image saved to gallery": "Η εικόνα αποθηκεύτηκε στη συλλογή"
+   208→ }
+   209→diff --git a/apps/readest-app/public/locales/es/translation.json b/apps/readest-app/public/locales/es/translation.json
+   210→index 83a8254eb6..123a0196e2 100644
+   211→--- a/apps/readest-app/public/locales/es/translation.json
+   212→+++ b/apps/readest-app/public/locales/es/translation.json
+   213→@@ -1808,5 +1808,10 @@
+   214→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Muestra una breve pista en tu idioma nativo encima de las palabras difíciles. Las palabras por encima de tu nivel reciben una pista.",
+   215→   "Level": "Nivel",
+   216→   "CEFR level": "Nivel CEFR",
+   217→-  "Webtoon Mode": "Modo webtoon"
+   218→+  "Webtoon Mode": "Modo webtoon",
+   219→+  "Image saved successfully": "Imagen guardada correctamente",
+   220→+  "Failed to save the image": "No se pudo guardar la imagen",
+   221→+  "Share Image": "Compartir imagen",
+   222→+  "Save Image": "Guardar imagen",
+   223→+  "Image saved to gallery": "Imagen guardada en la galería"
+   224→ }
+   225→diff --git a/apps/readest-app/public/locales/fa/translation.json b/apps/readest-app/public/locales/fa/translation.json
+   226→index 44af148005..8e4b44c250 100644
+   227→--- a/apps/readest-app/public/locales/fa/translation.json
+   228→+++ b/apps/readest-app/public/locales/fa/translation.json
+   229→@@ -1775,5 +1775,10 @@
+   230→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "یک راهنمای کوتاه به زبان مادری‌تان بالای واژه‌های دشوار نشان می‌دهد. واژه‌های بالاتر از سطح شما راهنما می‌گیرند.",
+   231→   "Level": "سطح",
+   232→   "CEFR level": "سطح CEFR",
+   233→-  "Webtoon Mode": "حالت وب‌تون"
+   234→+  "Webtoon Mode": "حالت وب‌تون",
+   235→+  "Image saved successfully": "تصویر با موفقیت ذخیره شد",
+   236→+  "Failed to save the image": "ذخیره تصویر ناموفق بود",
+   237→+  "Share Image": "اشتراک‌گذاری تصویر",
+   238→+  "Save Image": "ذخیره تصویر",
+   239→+  "Image saved to gallery": "تصویر در گالری ذخیره شد"
+   240→ }
+   241→diff --git a/apps/readest-app/public/locales/fr/translation.json b/apps/readest-app/public/locales/fr/translation.json
+   242→index eb68e4e582..3a42c945af 100644
+   243→--- a/apps/readest-app/public/locales/fr/translation.json
+   244→+++ b/apps/readest-app/public/locales/fr/translation.json
+   245→@@ -1808,5 +1808,10 @@
+   246→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Affiche une courte indication dans votre langue maternelle au-dessus des mots difficiles. Les mots au-dessus de votre niveau reçoivent une indication.",
+   247→   "Level": "Niveau",
+   248→   "CEFR level": "Niveau CEFR",
+   249→-  "Webtoon Mode": "Mode webtoon"
+   250→+  "Webtoon Mode": "Mode webtoon",
+   251→+  "Image saved successfully": "Image enregistrée avec succès",
+   252→+  "Failed to save the image": "Échec de l'enregistrement de l'image",
+   253→+  "Share Image": "Partager l'image",
+   254→+  "Save Image": "Enregistrer l'image",
+   255→+  "Image saved to gallery": "Image enregistrée dans la galerie"
+   256→ }
+   257→diff --git a/apps/readest-app/public/locales/he/translation.json b/apps/readest-app/public/locales/he/translation.json
+   258→index f2beae32a2..d84068f559 100644
+   259→--- a/apps/readest-app/public/locales/he/translation.json
+   260→+++ b/apps/readest-app/public/locales/he/translation.json
+   261→@@ -1808,5 +1808,10 @@
+   262→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "מציג רמז קצר בשפת האם שלך מעל מילים קשות. מילים מעל הרמה שלך מקבלות רמז.",
+   263→   "Level": "רמה",
+   264→   "CEFR level": "רמת CEFR",
+   265→-  "Webtoon Mode": "מצב ובטון"
+   266→+  "Webtoon Mode": "מצב ובטון",
+   267→+  "Image saved successfully": "התמונה נשמרה בהצלחה",
+   268→+  "Failed to save the image": "שמירת התמונה נכשלה",
+   269→+  "Share Image": "שיתוף התמונה",
+   270→+  "Save Image": "שמירת התמונה",
+   271→+  "Image saved to gallery": "התמונה נשמרה בגלריה"
+   272→ }
+   273→diff --git a/apps/readest-app/public/locales/hi/translation.json b/apps/readest-app/public/locales/hi/translation.json
+   274→index d5b534cdcf..dfd0e0211e 100644
+   275→--- a/apps/readest-app/public/locales/hi/translation.json
+   276→+++ b/apps/readest-app/public/locales/hi/translation.json
+   277→@@ -1775,5 +1775,10 @@
+   278→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "कठिन शब्दों के ऊपर आपकी मातृभाषा में एक छोटा संकेत दिखाता है। आपके स्तर से ऊपर के शब्दों को संकेत मिलता है।",
+   279→   "Level": "स्तर",
+   280→   "CEFR level": "CEFR स्तर",
+   281→-  "Webtoon Mode": "वेबटून मोड"
+   282→+  "Webtoon Mode": "वेबटून मोड",
+   283→+  "Image saved successfully": "छवि सफलतापूर्वक सहेजी गई",
+   284→+  "Failed to save the image": "छवि सहेजने में विफल",
+   285→+  "Share Image": "छवि साझा करें",
+   286→+  "Save Image": "छवि सहेजें",
+   287→+  "Image saved to gallery": "छवि गैलरी में सहेजी गई"
+   288→ }
+   289→diff --git a/apps/readest-app/public/locales/hu/translation.json b/apps/readest-app/public/locales/hu/translation.json
+   290→index e1b4bcac98..af143ab9cc 100644
+   291→--- a/apps/readest-app/public/locales/hu/translation.json
+   292→+++ b/apps/readest-app/public/locales/hu/translation.json
+   293→@@ -1775,5 +1775,10 @@
+   294→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Rövid anyanyelvi tippet jelenít meg a nehéz szavak fölött. A szintednél nehezebb szavak kapnak tippet.",
+   295→   "Level": "Szint",
+   296→   "CEFR level": "CEFR-szint",
+   297→-  "Webtoon Mode": "Webtoon mód"
+   298→+  "Webtoon Mode": "Webtoon mód",
+   299→+  "Image saved successfully": "A kép sikeresen mentve",
+   300→+  "Failed to save the image": "Nem sikerült menteni a képet",
+   301→+  "Share Image": "Kép megosztása",
+   302→+  "Save Image": "Kép mentése",
+   303→+  "Image saved to gallery": "A kép elmentve a galériába"
+   304→ }
+   305→diff --git a/apps/readest-app/public/locales/id/translation.json b/apps/readest-app/public/locales/id/translation.json
+   306→index 36ac3b1c77..e661d844b0 100644
+   307→--- a/apps/readest-app/public/locales/id/translation.json
+   308→+++ b/apps/readest-app/public/locales/id/translation.json
+   309→@@ -1742,5 +1742,10 @@
+   310→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Menampilkan petunjuk singkat dalam bahasa ibu Anda di atas kata-kata sulit. Kata-kata di atas level Anda mendapat petunjuk.",
+   311→   "Level": "Level",
+   312→   "CEFR level": "Level CEFR",
+   313→-  "Webtoon Mode": "Mode webtoon"
+   314→+  "Webtoon Mode": "Mode webtoon",
+   315→+  "Image saved successfully": "Gambar berhasil disimpan",
+   316→+  "Failed to save the image": "Gagal menyimpan gambar",
+   317→+  "Share Image": "Bagikan Gambar",
+   318→+  "Save Image": "Simpan Gambar",
+   319→+  "Image saved to gallery": "Gambar disimpan ke galeri"
+   320→ }
+   321→diff --git a/apps/readest-app/public/locales/it/translation.json b/apps/readest-app/public/locales/it/translation.json
+   322→index e2163e4c51..733e57dc34 100644
+   323→--- a/apps/readest-app/public/locales/it/translation.json
+   324→+++ b/apps/readest-app/public/locales/it/translation.json
+   325→@@ -1808,5 +1808,10 @@
+   326→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Mostra un breve suggerimento nella tua lingua madre sopra le parole difficili. Le parole sopra il tuo livello ricevono un suggerimento.",
+   327→   "Level": "Livello",
+   328→   "CEFR level": "Livello CEFR",
+   329→-  "Webtoon Mode": "Modalità webtoon"
+   330→+  "Webtoon Mode": "Modalità webtoon",
+   331→+  "Image saved successfully": "Immagine salvata correttamente",
+   332→+  "Failed to save the image": "Impossibile salvare l'immagine",
+   333→+  "Share Image": "Condividi immagine",
+   334→+  "Save Image": "Salva immagine",
+   335→+  "Image saved to gallery": "Immagine salvata nella galleria"
+   336→ }
+   337→diff --git a/apps/readest-app/public/locales/ja/translation.json b/apps/readest-app/public/locales/ja/translation.json
+   338→index 5bd5bb2f8b..cc5e377bca 100644
+   339→--- a/apps/readest-app/public/locales/ja/translation.json
+   340→+++ b/apps/readest-app/public/locales/ja/translation.json
+   341→@@ -1742,5 +1742,10 @@
+   342→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "難しい単語の上に母語の短いヒントを表示します。あなたのレベルを超える単語にヒントが付きます。",
+   343→   "Level": "レベル",
+   344→   "CEFR level": "CEFRレベル",
+   345→-  "Webtoon Mode": "ウェブトゥーンモード"
+   346→+  "Webtoon Mode": "ウェブトゥーンモード",
+   347→+  "Image saved successfully": "画像を保存しました",
+   348→+  "Failed to save the image": "画像の保存に失敗しました",
+   349→+  "Share Image": "画像を共有",
+   350→+  "Save Image": "画像を保存",
+   351→+  "Image saved to gallery": "画像をギャラリーに保存しました"
+   352→ }
+   353→diff --git a/apps/readest-app/public/locales/ko/translation.json b/apps/readest-app/public/locales/ko/translation.json
+   354→index 764d88dbfb..8a07f751cb 100644
+   355→--- a/apps/readest-app/public/locales/ko/translation.json
+   356→+++ b/apps/readest-app/public/locales/ko/translation.json
+   357→@@ -1742,5 +1742,10 @@
+   358→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "어려운 단어 위에 모국어로 된 짧은 힌트를 표시합니다. 내 수준보다 높은 단어에 힌트가 표시됩니다.",
+   359→   "Level": "수준",
+   360→   "CEFR level": "CEFR 수준",
+   361→-  "Webtoon Mode": "웹툰 모드"
+   362→+  "Webtoon Mode": "웹툰 모드",
+   363→+  "Image saved successfully": "이미지를 저장했습니다",
+   364→+  "Failed to save the image": "이미지를 저장하지 못했습니다",
+   365→+  "Share Image": "이미지 공유",
+   366→+  "Save Image": "이미지 저장",
+   367→+  "Image saved to gallery": "이미지를 갤러리에 저장했습니다"
+   368→ }
+   369→diff --git a/apps/readest-app/public/locales/ms/translation.json b/apps/readest-app/public/locales/ms/translation.json
+   370→index 3e804970ef..7322cba4b6 100644
+   371→--- a/apps/readest-app/public/locales/ms/translation.json
+   372→+++ b/apps/readest-app/public/locales/ms/translation.json
+   373→@@ -1742,5 +1742,10 @@
+   374→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Menunjukkan petunjuk ringkas dalam bahasa ibunda anda di atas perkataan sukar. Perkataan melebihi tahap anda akan mendapat petunjuk.",
+   375→   "Level": "Tahap",
+   376→   "CEFR level": "Tahap CEFR",
+   377→-  "Webtoon Mode": "Mode webtoon"
+   378→+  "Webtoon Mode": "Mode webtoon",
+   379→+  "Image saved successfully": "Imej berjaya disimpan",
+   380→+  "Failed to save the image": "Gagal menyimpan imej",
+   381→+  "Share Image": "Kongsi Imej",
+   382→+  "Save Image": "Simpan Imej",
+   383→+  "Image saved to gallery": "Imej disimpan ke galeri"
+   384→ }
+   385→diff --git a/apps/readest-app/public/locales/nl/translation.json b/apps/readest-app/public/locales/nl/translation.json
+   386→index 8adcc9a0fb..41d7051032 100644
+   387→--- a/apps/readest-app/public/locales/nl/translation.json
+   388→+++ b/apps/readest-app/public/locales/nl/translation.json
+   389→@@ -1775,5 +1775,10 @@
+   390→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Toont een korte hint in je moedertaal boven moeilijke woorden. Woorden boven jouw niveau krijgen een hint.",
+   391→   "Level": "Niveau",
+   392→   "CEFR level": "CEFR-niveau",
+   393→-  "Webtoon Mode": "Webtoon-modus"
+   394→+  "Webtoon Mode": "Webtoon-modus",
+   395→+  "Image saved successfully": "Afbeelding succesvol opgeslagen",
+   396→+  "Failed to save the image": "Kan de afbeelding niet opslaan",
+   397→+  "Share Image": "Afbeelding delen",
+   398→+  "Save Image": "Afbeelding opslaan",
+   399→+  "Image saved to gallery": "Afbeelding opgeslagen in de galerij"
+   400→ }
+   401→diff --git a/apps/readest-app/public/locales/pl/translation.json b/apps/readest-app/public/locales/pl/translation.json
+   402→index a7ffa6bb15..6f415a81de 100644
+   403→--- a/apps/readest-app/public/locales/pl/translation.json
+   404→+++ b/apps/readest-app/public/locales/pl/translation.json
+   405→@@ -1841,5 +1841,10 @@
+   406→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Pokazuje krótką wskazówkę w Twoim języku ojczystym nad trudnymi słowami. Słowa powyżej Twojego poziomu otrzymują wskazówkę.",
+   407→   "Level": "Poziom",
+   408→   "CEFR level": "Poziom CEFR",
+   409→-  "Webtoon Mode": "Tryb webtoon"
+   410→+  "Webtoon Mode": "Tryb webtoon",
+   411→+  "Image saved successfully": "Obraz został zapisany pomyślnie",
+   412→+  "Failed to save the image": "Nie udało się zapisać obrazu",
+   413→+  "Share Image": "Udostępnij obraz",
+   414→+  "Save Image": "Zapisz obraz",
+   415→+  "Image saved to gallery": "Obraz zapisano w galerii"
+   416→ }
+   417→diff --git a/apps/readest-app/public/locales/pt-BR/translation.json b/apps/readest-app/public/locales/pt-BR/translation.json
+   418→index 7bbc903b99..c2e0099a21 100644
+   419→--- a/apps/readest-app/public/locales/pt-BR/translation.json
+   420→+++ b/apps/readest-app/public/locales/pt-BR/translation.json
+   421→@@ -1808,5 +1808,10 @@
+   422→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Mostra uma breve dica no seu idioma nativo acima de palavras difíceis. Palavras acima do seu nível recebem uma dica.",
+   423→   "Level": "Nível",
+   424→   "CEFR level": "Nível CEFR",
+   425→-  "Webtoon Mode": "Modo webtoon"
+   426→+  "Webtoon Mode": "Modo webtoon",
+   427→+  "Image saved successfully": "Imagem salva com sucesso",
+   428→+  "Failed to save the image": "Falha ao salvar a imagem",
+   429→+  "Share Image": "Compartilhar imagem",
+   430→+  "Save Image": "Salvar imagem",
+   431→+  "Image saved to gallery": "Imagem salva na galeria"
+   432→ }
+   433→diff --git a/apps/readest-app/public/locales/pt/translation.json b/apps/readest-app/public/locales/pt/translation.json
+   434→index c3a675aa55..af4109323a 100644
+   435→--- a/apps/readest-app/public/locales/pt/translation.json
+   436→+++ b/apps/readest-app/public/locales/pt/translation.json
+   437→@@ -1808,5 +1808,10 @@
+   438→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Mostra uma breve dica na sua língua materna acima de palavras difíceis. Palavras acima do seu nível recebem uma dica.",
+   439→   "Level": "Nível",
+   440→   "CEFR level": "Nível CEFR",
+   441→-  "Webtoon Mode": "Modo webtoon"
+   442→+  "Webtoon Mode": "Modo webtoon",
+   443→+  "Image saved successfully": "Imagem salva com sucesso",
+   444→+  "Failed to save the image": "Falha ao salvar a imagem",
+   445→+  "Share Image": "Partilhar imagem",
+   446→+  "Save Image": "Salvar imagem",
+   447→+  "Image saved to gallery": "Imagem guardada na galeria"
+   448→ }
+   449→diff --git a/apps/readest-app/public/locales/ro/translation.json b/apps/readest-app/public/locales/ro/translation.json
+   450→index 85614f50e6..4267eccdb0 100644
+   451→--- a/apps/readest-app/public/locales/ro/translation.json
+   452→+++ b/apps/readest-app/public/locales/ro/translation.json
+   453→@@ -1808,5 +1808,10 @@
+   454→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Afișează un scurt indiciu în limba ta maternă deasupra cuvintelor dificile. Cuvintele peste nivelul tău primesc un indiciu.",
+   455→   "Level": "Nivel",
+   456→   "CEFR level": "Nivel CEFR",
+   457→-  "Webtoon Mode": "Mod webtoon"
+   458→+  "Webtoon Mode": "Mod webtoon",
+   459→+  "Image saved successfully": "Imagine salvată cu succes",
+   460→+  "Failed to save the image": "Salvarea imaginii a eșuat",
+   461→+  "Share Image": "Partajează imaginea",
+   462→+  "Save Image": "Salvează imaginea",
+   463→+  "Image saved to gallery": "Imagine salvată în galerie"
+   464→ }
+   465→diff --git a/apps/readest-app/public/locales/ru/translation.json b/apps/readest-app/public/locales/ru/translation.json
+   466→index 68392e12eb..4c575fe862 100644
+   467→--- a/apps/readest-app/public/locales/ru/translation.json
+   468→+++ b/apps/readest-app/public/locales/ru/translation.json
+   469→@@ -1841,5 +1841,10 @@
+   470→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Показывает короткую подсказку на вашем родном языке над сложными словами. Слова выше вашего уровня получают подсказку.",
+   471→   "Level": "Уровень",
+   472→   "CEFR level": "Уровень CEFR",
+   473→-  "Webtoon Mode": "Режим вебтуна"
+   474→+  "Webtoon Mode": "Режим вебтуна",
+   475→+  "Image saved successfully": "Изображение успешно сохранено",
+   476→+  "Failed to save the image": "Не удалось сохранить изображение",
+   477→+  "Share Image": "Поделиться изображением",
+   478→+  "Save Image": "Сохранить изображение",
+   479→+  "Image saved to gallery": "Изображение сохранено в галерее"
+   480→ }
+   481→diff --git a/apps/readest-app/public/locales/si/translation.json b/apps/readest-app/public/locales/si/translation.json
+   482→index 01a73d5589..568cd4e5d9 100644
+   483→--- a/apps/readest-app/public/locales/si/translation.json
+   484→+++ b/apps/readest-app/public/locales/si/translation.json
+   485→@@ -1775,5 +1775,10 @@
+   486→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "අසීරු වචන මත ඔබේ මව් භාෂාවෙන් කෙටි ඉඟියක් පෙන්වයි. ඔබේ මට්ටමට වඩා ඉහළ වචනවලට ඉඟියක් ලැබේ.",
+   487→   "Level": "මට්ටම",
+   488→   "CEFR level": "CEFR මට්ටම",
+   489→-  "Webtoon Mode": "Webtoon ආකාරය"
+   490→+  "Webtoon Mode": "Webtoon ආකාරය",
+   491→+  "Image saved successfully": "රූපය සාර්ථකව සුරැකිණි",
+   492→+  "Failed to save the image": "රූපය සුරැකීමට අසමත් විය",
+   493→+  "Share Image": "රූපය බෙදාගන්න",
+   494→+  "Save Image": "රූපය සුරකින්න",
+   495→+  "Image saved to gallery": "රූපය ගැලරියට සුරැකිණි"
+   496→ }
+   497→diff --git a/apps/readest-app/public/locales/sl/translation.json b/apps/readest-app/public/locales/sl/translation.json
+   498→index 8b480b1c7e..63ad38bf43 100644
+   499→--- a/apps/readest-app/public/locales/sl/translation.json
+   500→+++ b/apps/readest-app/public/locales/sl/translation.json
+   501→@@ -1841,5 +1841,10 @@
+   502→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Prikaže kratek namig v tvojem maternem jeziku nad težkimi besedami. Besede nad tvojo ravnjo dobijo namig.",
+   503→   "Level": "Raven",
+   504→   "CEFR level": "Raven CEFR",
+   505→-  "Webtoon Mode": "Tryb webtoon"
+   506→+  "Webtoon Mode": "Tryb webtoon",
+   507→+  "Image saved successfully": "Slika je bila uspešno shranjena",
+   508→+  "Failed to save the image": "Slike ni bilo mogoče shraniti",
+   509→+  "Share Image": "Deli sliko",
+   510→+  "Save Image": "Shrani sliko",
+   511→+  "Image saved to gallery": "Slika je shranjena v galerijo"
+   512→ }
+   513→diff --git a/apps/readest-app/public/locales/sv/translation.json b/apps/readest-app/public/locales/sv/translation.json
+   514→index 267d1522a8..a42bb557bb 100644
+   515→--- a/apps/readest-app/public/locales/sv/translation.json
+   516→+++ b/apps/readest-app/public/locales/sv/translation.json
+   517→@@ -1775,5 +1775,10 @@
+   518→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Visar en kort ledtråd på ditt modersmål ovanför svåra ord. Ord över din nivå får en ledtråd.",
+   519→   "Level": "Nivå",
+   520→   "CEFR level": "CEFR-nivå",
+   521→-  "Webtoon Mode": "Webtoon-läge"
+   522→+  "Webtoon Mode": "Webtoon-läge",
+   523→+  "Image saved successfully": "Bilden har sparats",
+   524→+  "Failed to save the image": "Det gick inte att spara bilden",
+   525→+  "Share Image": "Dela bild",
+   526→+  "Save Image": "Spara bild",
+   527→+  "Image saved to gallery": "Bilden har sparats i galleriet"
+   528→ }
+   529→diff --git a/apps/readest-app/public/locales/ta/translation.json b/apps/readest-app/public/locales/ta/translation.json
+   530→index da2a70ff4a..a2fa6badb5 100644
+   531→--- a/apps/readest-app/public/locales/ta/translation.json
+   532→+++ b/apps/readest-app/public/locales/ta/translation.json
+   533→@@ -1775,5 +1775,10 @@
+   534→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "கடினமான சொற்களுக்கு மேலே உங்கள் தாய்மொழியில் ஒரு சிறு குறிப்பைக் காட்டும். உங்கள் நிலைக்கு மேலான சொற்களுக்கு குறிப்பு கிடைக்கும்.",
+   535→   "Level": "நிலை",
+   536→   "CEFR level": "CEFR நிலை",
+   537→-  "Webtoon Mode": "வெப்டூன் பயன்முறை"
+   538→+  "Webtoon Mode": "வெப்டூன் பயன்முறை",
+   539→+  "Image saved successfully": "படம் வெற்றிகரமாகச் சேமிக்கப்பட்டது",
+   540→+  "Failed to save the image": "படத்தைச் சேமிக்க முடியவில்லை",
+   541→+  "Share Image": "படத்தைப் பகிர்",
+   542→+  "Save Image": "படத்தைச் சேமி",
+   543→+  "Image saved to gallery": "படம் கேலரியில் சேமிக்கப்பட்டது"
+   544→ }
+   545→diff --git a/apps/readest-app/public/locales/th/translation.json b/apps/readest-app/public/locales/th/translation.json
+   546→index 82df73184d..2a4c47a0a6 100644
+   547→--- a/apps/readest-app/public/locales/th/translation.json
+   548→+++ b/apps/readest-app/public/locales/th/translation.json
+   549→@@ -1742,5 +1742,10 @@
+   550→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "แสดงคำใบ้สั้น ๆ ในภาษาแม่ของคุณเหนือคำที่ยาก คำที่สูงกว่าระดับของคุณจะมีคำใบ้",
+   551→   "Level": "ระดับ",
+   552→   "CEFR level": "ระดับ CEFR",
+   553→-  "Webtoon Mode": "โหมดเว็บตูน"
+   554→+  "Webtoon Mode": "โหมดเว็บตูน",
+   555→+  "Image saved successfully": "บันทึกรูปภาพสำเร็จแล้ว",
+   556→+  "Failed to save the image": "ไม่สามารถบันทึกรูปภาพได้",
+   557→+  "Share Image": "แชร์รูปภาพ",
+   558→+  "Save Image": "บันทึกรูปภาพ",
+   559→+  "Image saved to gallery": "บันทึกรูปภาพไปยังแกลเลอรีแล้ว"
+   560→ }
+   561→diff --git a/apps/readest-app/public/locales/tr/translation.json b/apps/readest-app/public/locales/tr/translation.json
+   562→index e0429b0797..24ed739abc 100644
+   563→--- a/apps/readest-app/public/locales/tr/translation.json
+   564→+++ b/apps/readest-app/public/locales/tr/translation.json
+   565→@@ -1775,5 +1775,10 @@
+   566→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Zor kelimelerin üzerinde ana dilinizde kısa bir ipucu gösterir. Seviyenizin üzerindeki kelimeler ipucu alır.",
+   567→   "Level": "Seviye",
+   568→   "CEFR level": "CEFR seviyesi",
+   569→-  "Webtoon Mode": "Webtoon modu"
+   570→+  "Webtoon Mode": "Webtoon modu",
+   571→+  "Image saved successfully": "Görsel başarıyla kaydedildi",
+   572→+  "Failed to save the image": "Görsel kaydedilemedi",
+   573→+  "Share Image": "Görseli Paylaş",
+   574→+  "Save Image": "Görseli Kaydet",
+   575→+  "Image saved to gallery": "Görsel galeriye kaydedildi"
+   576→ }
+   577→diff --git a/apps/readest-app/public/locales/uk/translation.json b/apps/readest-app/public/locales/uk/translation.json
+   578→index 6eeda7afd2..a5593bef12 100644
+   579→--- a/apps/readest-app/public/locales/uk/translation.json
+   580→+++ b/apps/readest-app/public/locales/uk/translation.json
+   581→@@ -1841,5 +1841,10 @@
+   582→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Показує коротку підказку вашою рідною мовою над складними словами. Слова, вищі за ваш рівень, отримують підказку.",
+   583→   "Level": "Рівень",
+   584→   "CEFR level": "Рівень CEFR",
+   585→-  "Webtoon Mode": "Режим вебтуна"
+   586→+  "Webtoon Mode": "Режим вебтуна",
+   587→+  "Image saved successfully": "Зображення успішно збережено",
+   588→+  "Failed to save the image": "Не вдалося зберегти зображення",
+   589→+  "Share Image": "Поділитися зображенням",
+   590→+  "Save Image": "Зберегти зображення",
+   591→+  "Image saved to gallery": "Зображення збережено в галереї"
+   592→ }
+   593→diff --git a/apps/readest-app/public/locales/uz/translation.json b/apps/readest-app/public/locales/uz/translation.json
+   594→index 4d79a9545b..51aafffee4 100644
+   595→--- a/apps/readest-app/public/locales/uz/translation.json
+   596→+++ b/apps/readest-app/public/locales/uz/translation.json
+   597→@@ -1775,5 +1775,10 @@
+   598→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Qiyin so‘zlar ustida ona tilingizda qisqa maslahat ko‘rsatadi. Darajangizdan yuqori so‘zlarga maslahat beriladi.",
+   599→   "Level": "Daraja",
+   600→   "CEFR level": "CEFR darajasi",
+   601→-  "Webtoon Mode": "Webtoon rejimi"
+   602→+  "Webtoon Mode": "Webtoon rejimi",
+   603→+  "Image saved successfully": "Rasm muvaffaqiyatli saqlandi",
+   604→+  "Failed to save the image": "Rasmni saqlab bo'lmadi",
+   605→+  "Share Image": "Rasmni ulashish",
+   606→+  "Save Image": "Rasmni saqlash",
+   607→+  "Image saved to gallery": "Rasm galereyaga saqlandi"
+   608→ }
+   609→diff --git a/apps/readest-app/public/locales/vi/translation.json b/apps/readest-app/public/locales/vi/translation.json
+   610→index 374780da76..692a435bdd 100644
+   611→--- a/apps/readest-app/public/locales/vi/translation.json
+   612→+++ b/apps/readest-app/public/locales/vi/translation.json
+   613→@@ -1742,5 +1742,10 @@
+   614→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "Hiển thị gợi ý ngắn bằng tiếng mẹ đẻ của bạn phía trên những từ khó. Những từ trên trình độ của bạn sẽ có gợi ý.",
+   615→   "Level": "Cấp độ",
+   616→   "CEFR level": "Cấp độ CEFR",
+   617→-  "Webtoon Mode": "Chế độ webtoon"
+   618→+  "Webtoon Mode": "Chế độ webtoon",
+   619→+  "Image saved successfully": "Đã lưu hình ảnh thành công",
+   620→+  "Failed to save the image": "Không thể lưu hình ảnh",
+   621→+  "Share Image": "Chia sẻ hình ảnh",
+   622→+  "Save Image": "Lưu hình ảnh",
+   623→+  "Image saved to gallery": "Đã lưu hình ảnh vào thư viện"
+   624→ }
+   625→diff --git a/apps/readest-app/public/locales/zh-CN/translation.json b/apps/readest-app/public/locales/zh-CN/translation.json
+   626→index ca64090c25..6d750507dd 100644
+   627→--- a/apps/readest-app/public/locales/zh-CN/translation.json
+   628→+++ b/apps/readest-app/public/locales/zh-CN/translation.json
+   629→@@ -1742,5 +1742,10 @@
+   630→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "在生词上方显示一条母语简短提示。高于你水平的单词会显示提示。",
+   631→   "Level": "级别",
+   632→   "CEFR level": "CEFR 级别",
+   633→-  "Webtoon Mode": "条漫模式"
+   634→+  "Webtoon Mode": "条漫模式",
+   635→+  "Image saved successfully": "图片保存成功",
+   636→+  "Failed to save the image": "图片保存失败",
+   637→+  "Share Image": "分享图片",
+   638→+  "Save Image": "保存图片",
+   639→+  "Image saved to gallery": "图片已保存到相册"
+   640→ }
+   641→diff --git a/apps/readest-app/public/locales/zh-TW/translation.json b/apps/readest-app/public/locales/zh-TW/translation.json
+   642→index b41a2d313d..8cbbf1e318 100644
+   643→--- a/apps/readest-app/public/locales/zh-TW/translation.json
+   644→+++ b/apps/readest-app/public/locales/zh-TW/translation.json
+   645→@@ -1742,5 +1742,10 @@
+   646→   "Show a short native-language hint above difficult words. Words above your level get a hint.": "在難詞上方顯示一則母語簡短提示。高於你程度的單字會顯示提示。",
+   647→   "Level": "等級",
+   648→   "CEFR level": "CEFR 等級",
+   649→-  "Webtoon Mode": "條漫模式"
+   650→+  "Webtoon Mode": "條漫模式",
+   651→+  "Image saved successfully": "圖片儲存成功",
+   652→+  "Failed to save the image": "圖片儲存失敗",
+   653→+  "Share Image": "分享圖片",
+   654→+  "Save Image": "儲存圖片",
+   655→+  "Image saved to gallery": "圖片已儲存至相簿"
+   656→ }
+   657→diff --git a/apps/readest-app/src-tauri/plugins/tauri-plugin-native-bridge/android/src/main/java/NativeBridgePlugin.kt b/apps/readest-app/src-tauri/plugins/tauri-plugin-native-bridge/android/src/main/java/NativeBridgePlugin.kt
+   658→index d591ed9f88..7370c2c267 100644
+   659→--- a/apps/readest-app/src-tauri/plugins/tauri-plugin-native-bridge/android/src/main/java/NativeBridgePlugin.kt
+   660→+++ b/apps/readest-app/src-tauri/plugins/tauri-plugin-native-bridge/android/src/main/java/NativeBridgePlugin.kt
+   661→@@ -4,9 +4,11 @@ import android.Manifest
+   662→ import android.app.Activity
+   663→ import android.app.PendingIntent
+   664→ import android.content.ComponentName
+   665→+import android.content.ContentValues
+   666→ import android.content.Context
+   667→ import android.content.Intent
+   668→ import android.net.Uri
+   669→+import android.provider.MediaStore
+   670→ import android.util.Log
+   671→ import android.os.Build
+   672→ import android.os.Environment
+   673→@@ -55,6 +57,14 @@ class CopyURIRequestArgs {
+   674→     var dst: String? = null
+   675→ }
+   676→ 
+   677→+@InvokeArg
+   678→+class SaveImageToGalleryRequestArgs {
+   679→+    var srcPath: String? = null
+   680→+    var fileName: String? = null
+   681→+    var mimeType: String? = null
+   682→+    var albumName: String? = null
+   683→+}
+   684→+
+   685→ @InvokeArg
+   686→ class InstallPackageRequestArgs {
+   687→     var path: String? = null
+   688→@@ -369,6 +379,77 @@ class NativeBridgePlugin(private val activity: Activity): Plugin(activity) {
+   689→         }
+   690→     }
+   691→ 
+   692→+    @Command
+   693→+    fun save_image_to_gallery(invoke: Invoke) {
+   694→+        val args = invoke.parseArgs(SaveImageToGalleryRequestArgs::class.java)
+   695→+        pluginScope.launch {
+   696→+            val ret = withContext(Dispatchers.IO) {
+   697→+                val r = JSObject()
+   698→+                try {
+   699→+                    val srcFile = File(args.srcPath ?: "")
+   700→+                    if (!srcFile.exists()) {
+   701→+                        r.put("success", false)
+   702→+                        r.put("error", "Source file does not exist")
+   703→+                        return@withContext r
+   704→+                    }
+   705→+                    val displayName = args.fileName ?: srcFile.name
+   706→+                    val mimeType = args.mimeType ?: "image/*"
+   707→+                    val album = args.albumName ?: "Readest"
+   708→+                    val resolver = activity.contentResolver
+   709→+
+   710→+                    val values = ContentValues().apply {
+   711→+                        put(MediaStore.Images.Media.DISPLAY_NAME, displayName)
+   712→+                        put(MediaStore.Images.Media.MIME_TYPE, mimeType)
+   713→+                        // Scoped storage (Android 10+): place the image under the
+   714→+                        // shared Pictures collection without any storage permission,
+   715→+                        // and mark it pending until the bytes are fully written.
+   716→+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+   717→+                            put(
+   718→+                                MediaStore.Images.Media.RELATIVE_PATH,
+   719→+                                "${Environment.DIRECTORY_PICTURES}/$album"
+
+[showing lines 120-719 of 1652; use offset=720 with limit to continue reading]
