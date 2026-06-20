@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Readest Lite — 轻量自部署，阅读无界</title>
-  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。支持 EPUB/PDF/MOBI、TTS 朗读、云端同步、无限批注、多用户管理、远程下载、阅读器内 Web 搜索、服务器端翻译代理、Edge TTS、字体本地化，单 Docker 容器部署，数据完全自主。">
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。支持 EPUB/PDF/MOBI、TTS 朗读、云端同步、无限批注、多用户管理、远程下载、阅读器内 Web 搜索弹窗（支持自定义搜索引擎）、服务器端翻译代理（强制登录）、Edge TTS、字体本地化、100TB 软上限存储，单 Docker 容器部署，数据完全自主，持续高频迭代。">
   <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储,多用户,远程下载,Web搜索,Edge TTS,翻译代理">
   <meta name="author" content="cshdotcom">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -76,6 +76,7 @@
       </a>
       <ul class="nav-links">
         <li><a href="#features">功能</a></li>
+        <li><a href="#iteration">迭代</a></li>
         <li><a href="#diff">改动</a></li>
         <li><a href="/readestl/deploy.html">部署</a></li>
         <li><a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -102,7 +103,7 @@
         </div>
         <div class="hero-stats">
           <div><div class="stat-n">0</div><div class="stat-l">付费限制</div></div>
-          <div><div class="stat-n">&infin;</div><div class="stat-l">存储空间</div></div>
+          <div><div class="stat-n">100TB</div><div class="stat-l">软上限（不强制）</div></div>
           <div><div class="stat-n">1</div><div class="stat-l">Docker 容器</div></div>
         </div>
       </div>
@@ -131,15 +132,15 @@
         <article class="f-card rv"><div class="f-ico b">&#127908;</div><h3>TTS 朗读</h3><p>原版 Pro 功能，现无条件开放。内置高质量语音合成，多语种多音色，可调语速音调。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#9729;</div><h3>云端同步</h3><p>阅读进度、批注、书签自动同步，多端无缝切换。同步协议完全兼容原版前端逻辑。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#9997;</div><h3>无限批注与导出</h3><p>原版 Pro 功能，现无条件开放。高亮、划线、笔记一应俱全，支持导出 Markdown 或纯文本。</p></article>
-        <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>无限存储</h3><p>100TB 存储配额，书籍文件、封面图存于本地挂载卷，数据完全自主。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>实际无上限存储</h3><p>100TB 软上限（不强制），实际只受磁盘空间约束。书籍、封面存于本地挂载卷，数据完全自主。</p></article>
       </div>
 
-      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 新增</span></h3>
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 新增</span></h3>
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。普通用户独立空间，互不干扰，注册入口已关闭。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>在书库点击「导入」→「Download from URL」，服务器自动抓取并入库。外网流量不够时也能轻松添书。</p></article>
-        <article class="f-card rv"><div class="f-ico pk">&#128269;</div><h3>Web 搜索弹窗</h3><p>阅读器内悬浮搜索框，可选 Google / Bing / Baidu / Wikipedia，结果页通过服务器代理加载，链接自动改写为代理通道，沙箱 iframe 安全渲染。</p></article>
-        <article class="f-card rv"><div class="f-ico b">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 通过服务器代理访问，客户端无需加速器。代理路由可选 auth，未登录也能用。</p></article>
+        <article class="f-card rv"><div class="f-ico pk">&#128269;</div><h3>Web 搜索弹窗</h3><p>选中文字点「外部搜索」直接弹悬浮窗（不跳转）。内置 Google / Bing / Baidu / Wikipedia 走服务器代理；支持用户自定义搜索引擎，自定义项在新标签打开。</p></article>
+        <article class="f-card rv"><div class="f-ico b">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 全部走服务器代理，客户端无需加速器。<strong>v8.0：所有翻译/词典代理强制要求登录</strong>，自定义外部搜索引擎除外。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色，零成本零依赖。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128292;</div><h3>字体本地化</h3><p>阅读字体打包进镜像，不依赖外部 CDN，离线环境也能保持一致的中文渲染效果。</p></article>
       </div>
@@ -171,17 +172,32 @@
             <li><span class="ic ad">&#43;</span>无限存储，无容量与文件数限制</li>
             <li><span class="ic ad">&#43;</span>多用户系统，管理员可创建用户并分配配额</li>
             <li><span class="ic ad">&#43;</span>远程书籍下载，服务器代理获取 URL 书籍</li>
-            <li><span class="ic ad">&#43;</span>阅读器内 Web 搜索弹窗（Google/Bing/Baidu/Wikipedia，服务器代理）</li>
-            <li><span class="ic ad">&#43;</span>翻译词典服务器代理，客户端无需加速器</li>
+            <li><span class="ic ad">&#43;</span>阅读器内 Web 搜索弹窗（v8.0：内置引擎走代理 + 支持自定义引擎）</li>
+            <li><span class="ic ad">&#43;</span>翻译词典服务器代理，客户端无需加速器（v8.0：强制登录）</li>
             <li><span class="ic ad">&#43;</span>Edge TTS 服务器端合成，零成本零依赖</li>
             <li><span class="ic ad">&#43;</span>字体本地化，不依赖外部 CDN</li>
             <li><span class="ic ad">&#43;</span>DeepL 翻译可选启用（默认关闭）</li>
+            <li><span class="ic ad">&#43;</span>100TB 软上限（不强制），实际只受磁盘约束</li>
             <li><span class="ic ad">&#43;</span>SQLite + Prisma 替代 Postgres，数据完全自主</li>
             <li><span class="ic ad">&#43;</span>本地文件系统替代对象存储，书籍存于 /data/books</li>
             <li><span class="ic ad">&#43;</span>全部 API 契约 1:1 复刻，前端零修改可对接</li>
             <li><span class="ic ad">&#43;</span>单 Docker 镜像，端口 8225，数据卷持久化</li>
           </ul>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="iteration">
+    <div class="sec-in">
+      <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">每周一个版本，永远在变好</h2><p class="sec-d">这不是一个"上线即弃"的项目。我们以周为节奏迭代，每个版本都解决真实用户反馈的问题。</p></div>
+      <div class="f-grid">
+        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户系统、v8.0 Web 搜索弹窗与代理修复，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每次合并必过编译。</p></article>
+        <article class="f-card rv"><div class="f-ico t">&#128736;</div><h3>社区驱动</h3><p>用户反馈的 bug 和功能建议直接进迭代队列。从 100TB 配额、字体本地化到 DeepL 切换，每项都源自真实部署场景。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#128260;</div><h3>零停机升级</h3><p>SQLite 自动迁移、数据卷持久化，<code>docker compose pull &amp;&amp; up -d</code> 一条命令完成升级，旧数据无损。</p></article>
+        <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>
+        <article class="f-card rv"><div class="f-ico b">&#128187;</div><h3>CI 守护</h3><p>每次 push 自动跑 Docker 镜像构建 + smoke test，失败即阻塞合并。你拉到的每个镜像都验证过启动 + 登录 + API 响应。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>原版对齐</h3><p>持续跟进上游 Readest 的内核升级，新格式支持、新 TTS 引擎、新批注能力都会第一时间落地到 Lite。</p></article>
       </div>
     </div>
   </section>
