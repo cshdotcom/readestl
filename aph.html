@@ -75,10 +75,10 @@
       <div class="hero-tag"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span>持续迭代助手 · AI 维护交接</div>
       <h1>迭代 <span class="gt">提示词</span></h1>
       <p>这是 Readest Lite 的完整迭代助手提示词。每次版本迭代时，把这段提示词完整粘贴给后续的 AI 助手，让它快速理解项目背景、改造原则、已知坑点、禁止行为。本页面不在导航里露出，只能通过直接访问 URL 进入。</p>
-      <div class="hero-meta">
-        <span><span class="dot"></span>版本 v8.2.0</span>
-        <span><span class="dot"></span>更新于 2026-06-20</span>
-        <span><span class="dot"></span>适用于 commit v8.2.0 及之后</span>
+      <div class="hero-meta" id="heroMeta">
+        <span><span class="dot"></span>版本 <span id="metaVersion">加载中…</span></span>
+        <span><span class="dot"></span>更新于 <span id="metaDate">…</span></span>
+        <span><span class="dot"></span>适用于 commit <span id="metaCommit">…</span> 及之后</span>
       </div>
     </div>
 
@@ -136,6 +136,14 @@
         promptText = text;
         pre.textContent = text;
         charCount.textContent = text.length + ' 字符';
+
+        // v8.5: 从 markdown 内容动态提取版本号/日期/commit
+        var versionMatch = text.match(/提示词（(v[0-9.]+)）/);
+        var dateMatch = text.match(/\*\*最后更新\*\*：([0-9-]+)/);
+        var commitMatch = text.match(/\*\*适用 commit\*\*：`?([a-f0-9]+)/);
+        if (versionMatch) document.getElementById('metaVersion').textContent = versionMatch[1];
+        if (dateMatch) document.getElementById('metaDate').textContent = dateMatch[1];
+        if (commitMatch) document.getElementById('metaCommit').textContent = commitMatch[1];
       })
       .catch(function(err){
         // fallback: 如果 .md 加载失败，提示用户
