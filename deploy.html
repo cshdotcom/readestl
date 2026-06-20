@@ -84,12 +84,13 @@
     <p class="subtitle">5 分钟完成部署，从 Docker 安装到上线运行，按顺序跟做即可。</p>
 
     <div class="note tip" style="margin-bottom:1.5rem">
-      <strong>v8.3 最新功能：</strong>
-      账号切换数据隔离（登出时彻底清空当前账号的 library/settings/cursor/transferQueue，防止跨账号泄露）· 修复 handleLogout 未 await 的 bug · useBooksSync 加用户切换检测 + replace 模式 + 登录后显式 push。<br>
-      <strong>v8.2：</strong>代理开关 · 全站 Readest Lite 品牌 · 删除检查更新/AGPL/Discord/Reddit · GET health check · <a href="/readestl/aph.html">迭代提示词页面</a>。<br>
-      <strong>v8.1：</strong>远程下载写 Book 表 · ADMIN_USERNAME env · 删除 Web 搜索悬浮窗。<br>
+      <strong>v8.4 最新功能：</strong>
+      Per-user 加密 vault（服务端托管密钥 + AES-GCM 加密）——library/settings 按 userId 加密存储，密码不存客户端，浏览器存储只有密文，跨账号彻底隔离。<br>
+      <strong>v8.3：</strong>账号切换数据隔离 · 登出清空 library/settings/cursor。<br>
+      <strong>v8.2：</strong>代理开关 · 全站 Readest Lite 品牌 · <a href="/readestl/aph.html">迭代提示词页面</a>。<br>
+      <strong>v8.1：</strong>远程下载写 Book 表 · ADMIN_USERNAME env。<br>
       <strong>v8.0：</strong>所有翻译/词典代理强制登录。<br>
-      <strong>v7.0：</strong>多用户管理 · 远程书籍下载 · Edge TTS · 字体本地化 · DeepL 可选启用。
+      <strong>v7.0：</strong>多用户管理 · 远程书籍下载 · Edge TTS · 字体本地化。
     </div>
 
     <nav class="toc">
