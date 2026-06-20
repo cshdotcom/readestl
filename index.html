@@ -135,9 +135,9 @@
         <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>实际无上限存储</h3><p>100TB 软上限（不强制），实际只受磁盘空间约束。书籍、封面存于本地挂载卷，数据完全自主。</p></article>
       </div>
 
-      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 新增</span></h3>
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 新增</span></h3>
       <div class="f-grid">
-        <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。普通用户独立空间，互不干扰，注册入口已关闭。</p></article>
+        <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。<strong>v8.3：账号切换数据隔离</strong>，登出彻底清空，防止跨账号泄露。普通用户独立空间，互不干扰。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.1：修复书架不显示问题</strong>，下载完成后多端同步可见。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 全部走服务器代理，客户端无需加速器。<strong>v8.0：强制要求登录</strong>。<strong>v8.2：设置里可关代理</strong>，关了客户端直连。</p></article>
         <article class="f-card rv"><div class="f-ico b">&#128218;</div><h3>原版词典悬浮窗</h3><p>选中文字点「Dictionary」弹悬浮窗显示 Wikipedia/Wiktionary 查询结果，点「Translate」弹翻译悬浮窗。保留原版 Readest 完整体验，代理透传。</p></article>
@@ -191,7 +191,7 @@
     <div class="sec-in">
       <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">每周一个版本，永远在变好</h2><p class="sec-d">这不是一个"上线即弃"的项目。我们以周为节奏迭代，每个版本都解决真实用户反馈的问题。</p></div>
       <div class="f-grid">
-        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + 全站 Readest Lite 品牌，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每次合并必过编译，每个版本都打 git tag。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每次合并必过编译，每个版本都打 git tag。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128736;</div><h3>社区驱动</h3><p>用户反馈的 bug 和功能建议直接进迭代队列。从 100TB 配额、字体本地化到 DeepL 切换，每项都源自真实部署场景。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128260;</div><h3>零停机升级</h3><p>SQLite 自动迁移、数据卷持久化，<code>docker compose pull &amp;&amp; up -d</code> 一条命令完成升级，旧数据无损。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>

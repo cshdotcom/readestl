@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.2.0）
+# Readest Lite — 持续迭代助手提示词（v8.3.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -23,6 +23,7 @@
 11. COEP 全站 credentialless
 12. 远程书籍下载：`/api/books/download-url`
 13. **v8.2：代理开关 proxyEnabled**——用户可在设置里关代理走客户端直连
+14. **v8.3：账号切换数据隔离**——登出时彻底清空当前账号数据，防止跨账号泄露
 
 ---
 
@@ -30,102 +31,90 @@
 
 **每一个新版本必须打 git tag，防止源码混乱。**
 
-- 版本号格式：`v<major>.<minor>.<patch>`（如 `v8.2.0`、`v8.2.1`、`v8.3.0`）
+- 版本号格式：`v<major>.<minor>.<patch>`（如 `v8.3.0`、`v8.3.1`、`v8.4.0`）
 - 每个 tag 对应一个 commit，commit message 必须含完整改动清单
 - 推送时 `git push && git push --tags`
 - 主页 / 部署教程 / ITERATION_PROMPT.md 必须同步更新到对应版本号
 - Docker Image workflow 会用 `type=semver` 自动 push 3 个 image tag：`<version>`、`<major>.<minor>`、`latest`
-- 用户拉取特定版本：`docker pull ghcr.io/cshdotcom/readest-lite:8.2.0`（注意：不带 v 前缀）
+- 用户拉取特定版本：`docker pull ghcr.io/cshdotcom/readest-lite:8.3.0`（注意：不带 v 前缀）
 
 ---
 
-## v8.2.0 改动清单
+## v8.3.0 改动清单
 
-### 1. 代理开关 `proxyEnabled`（v8.2 新增）
+### 1. 账号切换数据隔离（v8.3 核心）
 
-用户可在「设置 → Integrations → Network」开关服务器代理：
-- **开启（默认）**：翻译/词典走服务器代理，客户端无需加速器
-- **关闭**：客户端直连 Google/Wikipedia 等目标 URL，需要客户端本地网络能访问这些站点
+**问题**：v8.2 及之前，登出账号 A → 登录账号 B 后，A 的书库、阅读进度、批注、第三方服务凭据（WebDAV/KOSync/Readwise/Hardcover/AI）、App Lock PIN 等全部残留，B 能看到 A 的数据。更严重的是 `handleAutoSync` 会把 A 的本地书 push 到 B 的云端账号，造成数据泄露。
 
-**新增文件**：
-- `utils/proxy.ts`：`isProxyEnabled()` / `fetchViaProxy()` / `fetchViaWikiProxy()` 工具函数
+**修复**：
 
-**改动文件**：
-- `types/settings.ts`：加 `proxyEnabled: boolean` 字段
-- `services/constants.ts`：默认 `proxyEnabled: true`
-- `components/settings/IntegrationsPanel.tsx`：加 Network section + "Server Proxy" toggle（用 RiCloudLine 图标）
-- `services/dictionaries/providers/wikipediaProvider.ts`：用 `fetchViaWikiProxy`，缩略图根据 `proxyEnabled` 决定走代理
-- `services/dictionaries/providers/wiktionaryProvider.ts`：用 `fetchViaWikiProxy`
-- `services/dictionaries/chineseDict.ts`：用 `fetchViaWikiProxy`
-- `services/translators/providers/google.ts`：根据 `isProxyEnabled()` 决定走代理或客户端直连
+#### 1.1 登出时彻底清理（`hooks/useUserActions.ts`）
 
-**不挂钩 proxyEnabled 的**：
-- Edge TTS（始终保持 v8.0 行为：wss 直连 + https 代理降级）
-- DeepL（始终走服务器代理，因为 API key 在服务器）
+`handleLogout` 改为 async，执行以下清理：
+- **清空 library**：`libraryStore.setLibrary([])` + `appService.saveLibraryBooks([], { replace: true })`
+- **重置 sync cursor**：`lastSyncedAtBooks`/`Configs`/`Notes` = 0（下次登录走全量 pull）
+- **清账号绑定的 settings 字段**：
+  - `kosync` / `readwise` / `hardcover` / `webdav` / `aiSettings` → 重置为 DEFAULT_*_SETTINGS
+  - `pinCodeEnabled` / `pinCodeHash` / `pinCodeSalt` → undefined（清 App Lock PIN）
+  - `lastSyncedAtReplicas` → {}（清 replica 同步状态）
+- **清 transfer queue**：`transferStore.clearAll()`（避免上个账号的上传/下载任务继续跑给下个账号）
+- **最后**：`await logout()`（修了原来没 await 的 bug）+ `navigateToLibrary`
 
-### 2. AboutWindow 改造
+**不删**：Books/ 目录下的 `<hash>/` 文件夹（文件本体保留，重新登录同账号可复用）
 
-- **删除检查更新功能**（`handleCheckUpdate` / `handleShowRecentUpdates` / `updateStatus` state / "Check Update" 按钮）
-- **删除版权 AGPL 说明**（保留 GitHub + Website 链接）
-- 标题 "Readest" → "Readest Lite"，"Lite" 用渐变高亮样式（emerald→teal→cyan + drop-shadow 发光）
-- 版权改为 `© cshdotcom. Based on Readest.`
+#### 1.2 user.id 变化检测 + 全量 pull replace（`app/library/hooks/useBooksSync.ts`）
 
-### 3. SupportLinks 改造
+新增 3 个 ref：
+- `prevUserIdRef`：记录上次的 user.id
+- `replaceModeRef`：标记下次 `updateLibrary` 走 replace 模式（不 merge）
+- `didInitialPushRef`：标记登录后是否已 push 过一次未同步的书
 
-- **删除 Discord、Reddit 链接**
-- 保留 GitHub 链接（已指向 `cshdotcom/readest-lite`）
-- **新增 SVG 按钮**指向 `https://cshdotcom.github.io/readestl/`（globe 图标，emerald→teal 渐变背景，hover 放大）
-- 文案 "Readest Community" → "Readest Lite Community"
+新增 2 个 effect：
+- **用户切换检测**：`useEffect([user?.id])`
+  - `prevId !== null && currId !== null && prevId !== currId`（账号切换）→ 清 library + 设 replaceMode + 重置 didInitialPush
+  - `prevId === null`（未登录→登录或首次安装）→ 不清 library（保留未登录时导入的书）
+- **登录后显式 push**：`useEffect([user, useSyncInited, libraryLoaded, lastSyncedAtBooks])`
+  - 等 `lastSyncedAtBooks > 0`（pull 完成）后，主动 `pushLibrary()` 一次
+  - 解决"未登录时导入书 → 登录后自动同步"的时序问题
 
-### 4. 全局 "Readest" → "Readest Lite" + 链接修正
+#### 1.3 updateLibrary 加 replace 模式（`app/library/hooks/useBooksSync.ts`）
 
-- `app/layout.tsx` metadata：title/description/template/appleWebApp.title/authors.url 全部改为 Readest Lite + cshdotcom
-- `app/offline/page.tsx`：`<h1>Readest</h1>` → "Readest Lite"（Lite 渐变高亮）
-- `app/o/page.tsx`：`Go to Readest` 链接 → `Go to Readest Lite` + 指向 cshdotcom.github.io
-- `app/auth/page.tsx`：`Sign in to Readest` → `Sign in to Readest Lite`
-- `app/error.tsx`：`mailto:support@readest.com` → `Visit Website` 链接
-- `components/landing/PageFooter.tsx`：页脚链接 → cshdotcom.github.io + Lite 高亮
-- `app/reader/components/sidebar/BookMenu.tsx`：`Download Readest` / `About Readest` → "Readest Lite"
-- `services/constants.ts`：`DOWNLOAD_READEST_URL` → `https://cshdotcom.github.io/readestl/`；`READEST_OPDS_USER_AGENT` → `ReadestLite/1.0`
+`updateLibrary` 函数开头加 `replaceModeRef.current` 检查：
+- `true` → 直接 `setLibrary(syncedBooks)` + `saveLibraryBooks(syncedBooks, { replace: true })`，不走 merge 逻辑
+- `false` → 原有 merge 逻辑（processOldBook + 新书追加）
 
-**不改的**（防止出错）：
-- `DATA_SUBDIR = 'Readest'`（本地/云盘目录名，改了用户数据找不到）
-- `SEND_EMAIL_DOMAIN = 'readest.com'`（后端邮箱域）
-- `READEST_UPDATER_FILE` / `READEST_NIGHTLY_UPDATER_FILE`（更新器路径）
-- `READEST_PUBLIC_STORAGE_BASE_URL`（公共存储 CDN）
-- `utils/deeplink.ts` / `utils/share.ts` 的 `web.readest.com` host 校验（改了 share/deeplink 失效）
-- 后端 API routes 里的 `Readest/Books/` 路径
-- 各文件纯注释里的 "Readest"
+### 2. 数据安全说明
 
-### 5. 代理路由加 GET health check
+**v8.3 的"清空"是逻辑清空，不是加密清空**：
+- `saveLibraryBooks([], { replace: true })` 覆盖 library.json 为空数组 `[]`
+- settings 敏感字段重置为默认值（空字符串/undefined）
+- 浏览器存储里能找到文件，但内容已清空（不是密文）
+- **v8.4 计划**：per-user 数据目录 + AES-GCM 加密，登出时数据加密保留而非清空
 
-用户报告"用登录账号手动访问 `/api/translate/google` 显示认证失败"——这是**预期行为**：
-- API 是 POST 接口，浏览器地址栏 GET 不会自动带 Authorization header
-- 所以返回 401 "Authentication required"
+### 3. 不做的事（v8.3 范围外）
 
-**v8.2 改进**：给三个代理路由加 GET handler，返回带 `hint` 字段的 JSON，告诉用户如何用 curl 测试：
-- `GET /api/translate/google` — 返回 ok/error + hint
-- `GET /api/proxy/wiki` — 同上
-- `GET /api/proxy/resource` — 同上
-
-### 6. GitHub Pages 加 /aph.html 隐藏页面
-
-- 路径：`https://cshdotcom.github.io/readestl/aph.html`
-- 内容：当前 ITERATION_PROMPT.md 完整内容
-- 功能：一键复制 + 下载 .md 文件
-- UI：暗色主题，与主页风格一致，支持移动端
-- 隐藏：主页和部署教程都不链接到 aph.html，只能手动输入 URL 访问
+- ❌ 不按 userId 分文件（`library_<userId>.json`）——工作量大，v8.4 做
+- ❌ 不加密 library.json ——v8.4 用 AES-GCM 加密
+- ❌ 不删 Books/ 目录下的书籍文件——文件本体保留
+- ❌ 不动 `useQuotaStats.ts`——CI 必挂（Supabase User 类型问题）
+- ❌ 不动后端 API、Prisma schema、代理路由
 
 ---
 
-## v8.3 待办（本次未做，CI 编译风险高）
+## v8.4 待办（下次，按账号隔离 + 加密）
+
+- per-user library 文件：`library_<userId>.json`
+- per-user settings 文件：`settings_<userId>.json`（账号绑定的字段）
+- 登出时数据 AES-GCM 加密保留（不删，用 user.id 派生密钥加密）
+- 登录时按 userId 加载对应文件
+- 全局共享：UI 偏好（themeMode/customThemes/themeColor 等）
+
+## v8.5+ 待办（写入笔记）
 
 - 配额 enforce（`storageQuotaMB` / `translationQuotaKB` 真正生效）
-- 配额 UI 显示真实数据（替换写死的 100TB）
+- 配额 UI 显示真实数据（替换写死的 100TB）——注意不要用 `user?.storageQuotaMB`，因为 useAuth 返回的是 Supabase User 类型没有这字段
 - 代理路由移除白名单 + SSRF 黑名单（登录用户全域放开）
-- RemoteDownloadDialog fire-and-forget 模式 + 任务队列 + 同步 + 重试
-
-**教训**：v8.1 第一次提交（commit `7d78205`）改动 30 个文件导致 CI 失败。根因是 `useQuotaStats.ts` 用了 `user?.storageQuotaMB`，但 `useAuth()` 返回的 user 是 Supabase User 类型没有这字段。v8.2 严格避免动 useQuotaStats，只做 proxyEnabled 这条线 + 安全的 UI 改动。
+- RemoteDownloadDialog fire-and-forget + 任务队列 + 同步 + 重试
 
 ---
 
@@ -139,8 +128,8 @@
 ```
 role             String   @default("user") // "admin" | "user"
 displayName      String?
-storageQuotaMB   Int      @default(0) // 0=无限（v8.2 仍为展示型，enforce 待 v8.3）
-translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enforce 待 v8.3）
+storageQuotaMB   Int      @default(0) // 0=无限（v8.5 计划 enforce）
+translationQuotaKB Int    @default(0) // 0=无限（v8.5 计划 enforce）
 ```
 
 ### Admin API 路由
@@ -170,7 +159,7 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 - Prisma schema 不能改（包括 User 扩展字段）
 
 ### 禁止清理"奇怪代码"
-- 所有 v7.0/v8.0/v8.1 的条目仍然适用
+- 所有 v7.0/v8.0/v8.1/v8.2 的条目仍然适用
 - **v8.0：代理路由用强制 auth**（不是可选 auth）
 - `validateAdmin` 用于 admin API
 - `validateUserAndToken` 从 DB 刷新 role/quotas
@@ -178,7 +167,7 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 
 ---
 
-## 已知"奇怪"代码（42 项）
+## 已知"奇怪"代码（46 项）
 
 1-30: 与 v7.0 相同
 
@@ -194,6 +183,10 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 40. **v8.2.0：AboutWindow 删除检查更新 + 版权 AGPL**，标题 "Readest Lite" 含 Lite 渐变高亮
 41. **v8.2.0：SupportLinks 删除 Discord/Reddit**，加 SVG globe 按钮指向 cshdotcom.github.io/readestl/
 42. **v8.2.0：代理路由加 GET health check**（带 hint 字段告诉用户如何 curl 测试）
+43. **v8.3.0：登出时彻底清空 library + settings + cursor + transferQueue**——`useUserActions.handleLogout` 改为 async
+44. **v8.3.0：useBooksSync 加 prevUserIdRef/replaceModeRef/didInitialPushRef**——检测账号切换 + replace 模式 + 登录后 push
+45. **v8.3.0：updateLibrary 加 replace 分支**——用户切换时直接 setLibrary(syncedBooks) 不 merge
+46. **v8.3.0：不删 Books/ 目录下的 `<hash>/` 文件**——文件本体保留，重新登录同账号可复用
 
 ---
 
@@ -206,7 +199,7 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 | `/api/auth/v1/user` | GET | Bearer | 获取用户 |
 | `/api/auth/v1/logout` | POST | 无 | 204 |
 | `/api/auth/v1/settings` | GET | 无 | 配置 |
-| `/api/sync` | GET/POST | Bearer | 同步 |
+| `/api/sync` | GET/POST | Bearer | 同步（按 userId 过滤） |
 | `/api/sync/replicas` | GET/POST | Bearer | CRDT 副本 |
 | `/api/sync/replica-keys` | GET/POST/DELETE | Bearer | 盐管理 |
 | `/api/storage/*` | * | Bearer | 文件存储 |
@@ -254,7 +247,7 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 
 ---
 
-## CI 失败排查（16 步）
+## CI 失败排查（17 步）
 1. TS 未使用变量 → 删除
 2. 类型不匹配 → `as unknown as`
 3. 客户端 'fs' → webpack isServer alias + `--webpack`
@@ -271,16 +264,19 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 14. **v8.0：getAccessToken 是 async** → 必须 `await`，不能当同步函数调
 15. **v8.1.0：移除 WebSearchPopup 后，AnnotationToolType 不要再加 `'websearch'`**
 16. **v8.2.0：不要动 `useQuotaStats.ts` 用 `user?.storageQuotaMB`**——useAuth 返回的 user 是 Supabase User 类型没有这字段，会 TS 编译失败
+17. **v8.3.0：`handleLogout` 是 async**——调用方必须 `await handleLogout()`，不要同步调用
 
-### v8.2 CI 教训
+### v8.3 CI 教训
 
 **v8.1 第一次提交失败根因**：`useQuotaStats.ts` 改为 `fetch /api/usage` + 用 `user?.storageQuotaMB`，但 `useAuth()` 返回的是 Supabase User 类型，没有 `storageQuotaMB` 字段，TS 严格模式必报错。
 
 **v8.2 对策**：严格避免动 useQuotaStats，只做 proxyEnabled 这条线（不涉及 Supabase User 类型）+ 安全的 UI 改动（字符串替换、删除代码、新增 SVG）。
 
+**v8.3 对策**：继续不动 useQuotaStats。账号切换数据隔离只动 `useUserActions.ts`（登出清理）+ `useBooksSync.ts`（user.id 检测 + replace 模式 + 登录后 push），不碰 Supabase User 类型。
+
 ---
 
-## 禁止行为清单（35 条）
+## 禁止行为清单（38 条）
 
 - ❌ 不重构"不要改"的文件
 - ❌ 不简化"奇怪代码"
@@ -318,6 +314,9 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 - ❌ **v8.2.0：不把 Edge TTS 挂钩 proxyEnabled**（保持 v8.0 行为）
 - ❌ **v8.2.0：不把 DATA_SUBDIR 改名**（会破坏用户数据目录）
 - ❌ **v8.2.0：不动 useQuotaStats.ts 用 Supabase User 上不存在的字段**（CI 必挂）
+- ❌ **v8.3.0：不把 handleLogout 改回同步**（必须 async，含清理逻辑）
+- ❌ **v8.3.0：不把 useBooksSync 的 prevUserIdRef/replaceModeRef/didInitialPushRef 删掉**（账号切换隔离靠它们）
+- ❌ **v8.3.0：不把 updateLibrary 的 replace 分支删掉**（用户切换时必须 replace 不 merge）
 
 ---
 
@@ -328,11 +327,11 @@ translationQuotaKB Int    @default(0) // 0=无限（v8.2 仍为展示型，enfor
 - **迭代提示词（隐藏）**：`https://cshdotcom.github.io/readestl/aph.html`
 - 源码仓库：`cshdotcom/readestl`（GitHub Pages 仓库）
 - 主页含「持续迭代」section，强调高频迭代 + CI 守护 + 社区驱动
-- 部署教程 FAQ 含 v8.2 新功能说明（代理开关、代理鉴权说明、ADMIN_USERNAME env、CLI 启动示例）
+- 部署教程 FAQ 含 v8.3 新功能说明（账号切换数据隔离、登出清理、代理开关、代理鉴权说明）
 
 ---
 
-**版本**：v8.2.0
+**版本**：v8.3.0
 **最后更新**：2026-06-20
-**适用 commit**：v8.2.0 tag 及之后
-**CI 状态**：⏳ 待验证（v8.2.0 push 后必须确认 GitHub Actions Docker Image + CI smoke test 均 conclusion=success）
+**适用 commit**：v8.3.0 tag 及之后
+**CI 状态**：⏳ 待验证（v8.3.0 push 后必须确认 GitHub Actions Docker Image + CI smoke test 均 conclusion=success）
