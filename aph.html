@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>迭代提示词 — Readest Lite</title>
+  <meta name="description" content="Readest Lite 持续迭代助手提示词，用于后续 AI 助手接管维护工作。">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#07070c;--bg2:#0d0d14;--card:#12121b;--card-h:#181824;--fg:#eeeef4;--fg2:#8e8ea6;--muted:#555570;--accent:#6c5ce7;--accent-l:#a29bfe;--accent-g:rgba(108,92,231,.25);--teal:#00cec9;--teal-g:rgba(0,206,201,.15);--green:#00b894;--grad1:linear-gradient(135deg,#6c5ce7,#a29bfe);--grad3:linear-gradient(135deg,#6c5ce7,#00cec9);--border:rgba(255,255,255,.05);--border-h:rgba(255,255,255,.1);--r:14px;--r-sm:8px;--r-lg:22px;--shadow:0 8px 32px rgba(0,0,0,.5);--ease:.3s cubic-bezier(.4,0,.2,1);--sans:'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono','Fira Code',monospace}
+    html[data-theme="light"]{--bg:#fafafe;--bg2:#f2f2f8;--card:#fff;--card-h:#f5f5fa;--fg:#1a1a2e;--fg2:#5f5f78;--muted:#9494a8;--accent-g:rgba(108,92,231,.12);--border:rgba(0,0,0,.05);--border-h:rgba(0,0,0,.1);--shadow:0 8px 32px rgba(0,0,0,.06)}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.7;min-height:100vh;-webkit-font-smoothing:antialiased}::selection{background:var(--accent);color:#fff}::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+    .bg-mesh{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}.bg-mesh .orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.25;animation:orbF 30s ease-in-out infinite}.bg-mesh .orb:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,var(--accent-g),transparent 70%);top:-200px;right:-100px}.bg-mesh .orb:nth-child(2){width:500px;height:500px;background:radial-gradient(circle,var(--teal-g),transparent 70%);bottom:-150px;left:-150px;animation-delay:-10s}@keyframes orbF{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.05)}}
+    .nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(7,7,12,.8);border-bottom:1px solid var(--border)}html[data-theme="light"] .nav{background:rgba(250,250,254,.88)}
+    .nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;gap:1rem;flex-wrap:wrap}
+    .nav-title{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.1rem}
+    .nav-title .badge{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:100px;background:var(--grad3);color:#fff}
+    .nav-title .lite{background:linear-gradient(135deg,#34d399,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-extrabold}
+    .nav-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r-sm);font-size:.85rem;font-weight:600;transition:var(--ease);border:none;cursor:pointer;text-decoration:none;font-family:inherit}
+    .btn-p{background:var(--grad1);color:#fff;box-shadow:0 4px 16px var(--accent-g)}.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px var(--accent-g)}
+    .btn-s{background:var(--card);color:var(--fg);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent);background:var(--card-h)}
+    .btn-ghost{background:transparent;color:var(--fg2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--fg);border-color:var(--border-h)}
+    .theme-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--fg2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--ease)}.theme-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-g)}.theme-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem}
+    .hero{text-align:center;padding:2rem 0 3rem}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;background:var(--accent-g);border:1px solid rgba(108,92,231,.18);font-size:.72rem;font-weight:600;color:var(--accent-l);margin-bottom:1.2rem}
+    .hero h1{font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:900;letter-spacing:-.03em;margin-bottom:.8rem;line-height:1.15}
+    .hero h1 .gt{background:var(--grad3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{color:var(--fg2);max-width:640px;margin:0 auto;font-size:.95rem;line-height:1.8}
+    .hero-meta{display:flex;justify-content:center;gap:1.5rem;margin-top:1.5rem;font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+    .hero-meta span{display:inline-flex;align-items:center;gap:5px}
+    .hero-meta .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+    .toolbar{display:flex;gap:.6rem;justify-content:center;margin:2rem 0;flex-wrap:wrap}
+    .content-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+    .content-header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.2rem;background:var(--bg2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.78rem;color:var(--fg2)}
+    .content-header .dots{display:flex;gap:6px}.content-header .dot{width:11px;height:11px;border-radius:50%}.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+    .content-header .filename{flex:1;text-align:center;color:var(--muted)}
+    .content-body{padding:0;max-height:none;overflow:visible}
+    pre{margin:0;padding:1.5rem;font-family:var(--mono);font-size:.82rem;line-height:1.7;color:var(--fg);white-space:pre-wrap;word-break:break-word;tab-size:2;overflow-x:auto}
+    pre .hl-1{color:var(--accent-l);font-weight:600}pre .hl-2{color:var(--teal)}pre .hl-3{color:var(--green)}pre .hl-4{color:var(--pink)}
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:.8rem 1.4rem;font-size:.85rem;color:var(--fg);box-shadow:var(--shadow);z-index:1000;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:.5rem}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast .check{color:var(--green);font-size:1.1rem}
+    footer{border-top:1px solid var(--border);padding:2rem 1.5rem;text-align:center;color:var(--muted);font-size:.8rem}
+    footer a{color:var(--accent-l);text-decoration:none}footer a:hover{color:var(--accent)}
+    @media(max-width:640px){.nav-inner{padding:.8rem 1rem}.nav-title{font-size:1rem}main{padding:1.5rem 1rem 3rem}pre{padding:1rem;font-size:.75rem}.content-header .filename{display:none}}
+  </style>
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true"><div class="orb"></div><div class="orb"></div></div>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-title">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><path d="M8 10h4c2.2 0 4 1.8 4 4s-1.8 4-4 4H8V10z" stroke="#fff" stroke-width="2" fill="none"/><path d="M17 10c2.5 0 5 2 5 4s-2.5 4-5 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6c5ce7"/><stop offset="1" stop-color="#00cec9"/></linearGradient></defs></svg>
+        Readest <span class="lite">Lite</span>
+        <span class="badge">迭代提示词</span>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-btn" aria-label="切换主题" id="themeBtn">
+          <svg id="themeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <a href="/readestl/" class="btn btn-ghost">返回首页</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <div class="hero-tag"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span>持续迭代助手 · AI 维护交接</div>
+      <h1>迭代 <span class="gt">提示词</span></h1>
+      <p>这是 Readest Lite 的完整迭代助手提示词。每次版本迭代时，把这段提示词完整粘贴给后续的 AI 助手，让它快速理解项目背景、改造原则、已知坑点、禁止行为。本页面不在导航里露出，只能通过直接访问 URL 进入。</p>
+      <div class="hero-meta">
+        <span><span class="dot"></span>版本 v8.2.0</span>
+        <span><span class="dot"></span>更新于 2026-06-20</span>
+        <span><span class="dot"></span>适用于 commit v8.2.0 及之后</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-p" id="copyBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        一键复制全部
+      </button>
+      <button class="btn btn-s" id="downloadBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        下载 .md 文件
+      </button>
+      <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+
+    <div class="content-card">
+      <div class="content-header">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="filename">ITERATION_PROMPT.md</div>
+        <div style="font-size:.7rem;color:var(--muted)" id="charCount">— 字符</div>
+      </div>
+      <div class="content-body">
+        <pre id="promptContent">加载中…</pre>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2024-2026 Readest Lite · <a href="/readestl/">返回首页</a> · <a href="/readestl/deploy.html">部署教程</a></p>
+  </footer>
+
+  <div class="toast" id="toast">
+    <span class="check">✓</span>
+    <span id="toastMsg">已复制到剪贴板</span>
+  </div>
+
+  <script>
+    var sunP='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    var moonP='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeIcon').innerHTML=t==='light'?moonP:sunP;try{localStorage.setItem('rl-theme',t)}catch(e){}}
+    (function(){var s=null;try{s=localStorage.getItem('rl-theme')}catch(e){}var p=window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';applyTheme(s||p)})();
+    document.getElementById('themeBtn').addEventListener('click',function(){var c=document.documentElement.getAttribute('data-theme');applyTheme(c==='light'?'dark':'light')});
+
+    var promptText = '';
+    var pre = document.getElementById('promptContent');
+    var charCount = document.getElementById('charCount');
+
+    // 加载 ITERATION_PROMPT.md 内容（与主页同目录）
+    fetch('ITERATION_PROMPT.md?t=' + Date.now())
+      .then(function(r){return r.ok ? r.text() : Promise.reject('Not found');})
+      .then(function(text){
+        promptText = text;
+        pre.textContent = text;
+        charCount.textContent = text.length + ' 字符';
+      })
+      .catch(function(err){
+        // fallback: 如果 .md 加载失败，提示用户
+        pre.textContent = '⚠ 加载 ITERATION_PROMPT.md 失败：' + err + '\n\n请确保此页面与 ITERATION_PROMPT.md 在同一目录。';
+        charCount.textContent = '加载失败';
+      });
+
+    function showToast(msg){
+      var toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function(){toast.classList.remove('show');}, 2200);
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', function(){
+      if(!promptText){showToast('内容尚未加载'); return;}
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(promptText).then(function(){
+          showToast('已复制到剪贴板（' + promptText.length + ' 字符）');
+        }).catch(function(){
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
+      }
+    });
+
+    function fallbackCopy(){
+      var ta = document.createElement('textarea');
+      ta.value = promptText;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{
+        document.execCommand('copy');
+        showToast('已复制到剪贴板（' + promptText.length + ' 字符）');
+      }catch(e){
+        showToast('复制失败，请手动选择文本');
+      }
+      document.body.removeChild(ta);
+    }
+
+    document.getElementById('downloadBtn').addEventListener('click', function(){
+      if(!promptText){showToast('内容尚未加载'); return;}
+      var blob = new Blob([promptText], {type: 'text/markdown;charset=utf-8'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'ITERATION_PROMPT.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('已下载 ITERATION_PROMPT.md');
+    });
+  </script>
+</body>
+</html>
