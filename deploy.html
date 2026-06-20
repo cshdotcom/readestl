@@ -83,6 +83,11 @@
     <h1>部署 <span class="gt">教程</span></h1>
     <p class="subtitle">5 分钟完成部署，从 Docker 安装到上线运行，按顺序跟做即可。</p>
 
+    <div class="note tip" style="margin-bottom:1.5rem">
+      <strong>v7.0 新功能：</strong>
+      多用户管理（管理员创建用户并分配配额） · 远程书籍下载（URL → 服务器抓取入库） · 阅读器内 Web 搜索弹窗（Google/Bing/Baidu/Wikipedia，服务器代理） · Edge TTS（服务器端 WebSocket 合成） · 翻译词典代理（客户端无需加速器） · 字体本地化（离线可用） · 100TB 存储配额。
+    </div>
+
     <nav class="toc">
       <span class="toc-label">目录</span>
       <a href="#prereq">环境准备</a>
@@ -292,6 +297,9 @@ docker image prune -f</pre>
 
       <h3>如何使用远程下载？</h3>
       <p>在书库页面点击「导入」→「Download from URL」，输入书籍直链地址（如 <code>https://example.com/book.epub</code>），服务器会自动下载并添加到你的书架。</p>
+
+      <h3>如何在阅读时进行 Web 搜索？</h3>
+      <p>阅读器内打开任意书籍后，点击工具栏的搜索图标即可弹出 Web 搜索浮窗。可在 Google / Bing / Baidu / Wikipedia 之间切换搜索引擎，搜索结果页通过服务器代理加载，结果中的链接会被自动改写为代理通道，因此<strong>客户端无需加速器</strong>就能访问 Google、Wikipedia 等境外站点。浮窗支持全屏切换、前进后退、新标签打开。</p>
 
       <h3>翻译和词典需要加速器吗？</h3>
       <p>不需要。Google 翻译、Wikipedia、Wiktionary 都通过服务器代理访问。只要服务器能访问 Google（如国外 VPS），客户端无需加速器即可使用。</p>

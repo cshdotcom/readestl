@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Readest Lite — 轻量自部署，阅读无界</title>
-  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。支持 EPUB/PDF/MOBI、TTS 朗读、云端同步、无限批注、多用户管理、远程下载、服务器端翻译代理，单 Docker 容器部署，数据完全自主。">
-  <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储">
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。支持 EPUB/PDF/MOBI、TTS 朗读、云端同步、无限批注、多用户管理、远程下载、阅读器内 Web 搜索、服务器端翻译代理、Edge TTS、字体本地化，单 Docker 容器部署，数据完全自主。">
+  <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储,多用户,远程下载,Web搜索,Edge TTS,翻译代理">
   <meta name="author" content="cshdotcom">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="https://cshdotcom.github.io/readestl/">
@@ -53,6 +53,7 @@
     .hero-glow{position:absolute;width:120%;height:120%;top:-10%;left:-10%;background:radial-gradient(ellipse,var(--accent-g) 0%,transparent 55%);z-index:-1;animation:gp 5s ease-in-out infinite}@keyframes gp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.04)}}
 
     .sec{padding:90px 2rem;position:relative}.sec-in{max-width:1140px;margin:0 auto}.sec-hd{text-align:center;margin-bottom:3.5rem}.sec-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 13px;border-radius:100px;background:var(--accent-g);border:1px solid rgba(108,92,231,.12);font-size:.7rem;font-weight:700;color:var(--accent-l);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem}.sec-t{font-size:clamp(1.9rem,3.2vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:.8rem}.sec-d{font-size:1rem;color:var(--fg2);max-width:560px;margin:0 auto;line-height:1.75}
+    .sub-h{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin:2.5rem 0 1.25rem;display:flex;align-items:center;gap:.7rem}.sub-h::before{content:'';width:4px;height:18px;border-radius:2px;background:var(--grad3)}.sub-h-tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;background:var(--accent-g);border:1px solid rgba(108,92,231,.18);font-size:.62rem;font-weight:700;color:var(--accent-l);text-transform:uppercase;letter-spacing:.08em}
     .f-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}.f-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;transition:var(--ease);position:relative;overflow:hidden}.f-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad1);opacity:0;transition:var(--ease)}.f-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:var(--shadow)}.f-card:hover::before{opacity:1}.f-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1.1rem}.f-ico.p{background:rgba(108,92,231,.1);color:var(--accent-l)}.f-ico.t{background:rgba(0,206,201,.1);color:var(--teal)}.f-ico.pk{background:rgba(253,121,168,.1);color:var(--pink)}.f-ico.b{background:rgba(116,185,255,.1);color:#74b9ff}.f-ico.g{background:rgba(0,184,148,.1);color:var(--green)}.f-card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem;letter-spacing:-.01em}.f-card p{font-size:.84rem;color:var(--fg2);line-height:1.75}
     .diff-sec{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.d-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}.d-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem;transition:var(--ease)}.d-card:hover{border-color:var(--border-h);transform:translateY(-2px)}.d-hd{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}.d-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}.d-ico.rm{background:rgba(255,95,87,.1);color:#ff5f57}.d-ico.ad{background:rgba(0,184,148,.1);color:var(--green)}.d-card h3{font-size:1.05rem;font-weight:700}.d-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}.d-list li{display:flex;align-items:flex-start;gap:.6rem;font-size:.85rem;color:var(--fg2);line-height:1.6}.d-list li .ic{flex-shrink:0;font-weight:700;margin-top:1px}.d-list li .ic.rm{color:#ff5f57}.d-list li .ic.ad{color:var(--green)}
 
@@ -94,7 +95,7 @@
       <div class="hero-text">
         <div class="hero-badge"><span class="dot"></span>基于 Readest 二开 · 轻量自部署</div>
         <h1>轻量自部署<br><span class="gt">阅读无界</span></h1>
-        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。支持多用户管理、远程下载、服务器端翻译代理。单容器 Docker 部署，数据完全自主，100TB 配额，持续迭代与原版功能对齐。</p>
+        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v7.0 新增多用户管理、远程下载、阅读器内 Web 搜索、服务器端翻译代理、Edge TTS、字体本地化。单容器 Docker 部署，数据完全自主，100TB 配额。</p>
         <div class="hero-actions">
           <a href="/readestl/deploy.html" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>一键部署</a>
           <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a>
@@ -121,7 +122,9 @@
 
   <section class="sec" id="features">
     <div class="sec-in">
-      <div class="sec-hd rv"><div class="sec-tag">核心功能</div><h2 class="sec-t">保留原版全部核心能力</h2><p class="sec-d">与 Readest 功能持续对齐，所有原版 Pro 专属功能无条件开放。</p></div>
+      <div class="sec-hd rv"><div class="sec-tag">核心功能</div><h2 class="sec-t">保留原版 + 自部署增强</h2><p class="sec-d">与 Readest 功能持续对齐，所有原版 Pro 专属功能无条件开放；额外内置多用户、远程下载、Web 搜索、翻译代理、Edge TTS 等自部署增强能力。</p></div>
+
+      <h3 class="sub-h rv">核心阅读能力</h3>
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>多格式阅读</h3><p>原生支持 EPUB、PDF、MOBI、AZW3 等主流电子书格式，无需转换直接打开，自动适配最佳排版。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128421;</div><h3>分屏阅读</h3><p>原版 Pro 功能，现无条件开放。支持双屏对照阅读，左原文右译文，或同时参考两本书。</p></article>
@@ -129,10 +132,16 @@
         <article class="f-card rv"><div class="f-ico pk">&#9729;</div><h3>云端同步</h3><p>阅读进度、批注、书签自动同步，多端无缝切换。同步协议完全兼容原版前端逻辑。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#9997;</div><h3>无限批注与导出</h3><p>原版 Pro 功能，现无条件开放。高亮、划线、笔记一应俱全，支持导出 Markdown 或纯文本。</p></article>
         <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>无限存储</h3><p>100TB 存储配额，书籍文件、封面图存于本地挂载卷，数据完全自主。</p></article>
-        <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。普通用户独立空间，互不干扰。</p></article>
-        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>输入书籍 URL，服务器自动下载到书架。外网流量不够时也能轻松添书。</p></article>
-        <article class="f-card rv"><div class="f-ico pk">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 通过服务器代理访问，客户端无需加速器。</p></article>
-        <article class="f-card rv"><div class="f-ico b">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色。</p></article>
+      </div>
+
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 新增</span></h3>
+      <div class="f-grid">
+        <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。普通用户独立空间，互不干扰，注册入口已关闭。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>在书库点击「导入」→「Download from URL」，服务器自动抓取并入库。外网流量不够时也能轻松添书。</p></article>
+        <article class="f-card rv"><div class="f-ico pk">&#128269;</div><h3>Web 搜索弹窗</h3><p>阅读器内悬浮搜索框，可选 Google / Bing / Baidu / Wikipedia，结果页通过服务器代理加载，链接自动改写为代理通道，沙箱 iframe 安全渲染。</p></article>
+        <article class="f-card rv"><div class="f-ico b">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 通过服务器代理访问，客户端无需加速器。代理路由可选 auth，未登录也能用。</p></article>
+        <article class="f-card rv"><div class="f-ico t">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色，零成本零依赖。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#128292;</div><h3>字体本地化</h3><p>阅读字体打包进镜像，不依赖外部 CDN，离线环境也能保持一致的中文渲染效果。</p></article>
       </div>
     </div>
   </section>
@@ -162,7 +171,9 @@
             <li><span class="ic ad">&#43;</span>无限存储，无容量与文件数限制</li>
             <li><span class="ic ad">&#43;</span>多用户系统，管理员可创建用户并分配配额</li>
             <li><span class="ic ad">&#43;</span>远程书籍下载，服务器代理获取 URL 书籍</li>
+            <li><span class="ic ad">&#43;</span>阅读器内 Web 搜索弹窗（Google/Bing/Baidu/Wikipedia，服务器代理）</li>
             <li><span class="ic ad">&#43;</span>翻译词典服务器代理，客户端无需加速器</li>
+            <li><span class="ic ad">&#43;</span>Edge TTS 服务器端合成，零成本零依赖</li>
             <li><span class="ic ad">&#43;</span>字体本地化，不依赖外部 CDN</li>
             <li><span class="ic ad">&#43;</span>DeepL 翻译可选启用（默认关闭）</li>
             <li><span class="ic ad">&#43;</span>SQLite + Prisma 替代 Postgres，数据完全自主</li>
@@ -178,7 +189,7 @@
   <section class="sec cta">
     <div class="sec-in">
       <div class="cta-box rv">
-        <h2>数据自主，功能全开，多用户支持</h2>
+        <h2>数据自主，功能全开，多用户 · 远程下载 · Web 搜索</h2>
         <p>Readest Lite —— 去除一切限制，只保留纯粹的阅读体验。</p>
         <div class="cta-btns">
           <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub 仓库</a>
