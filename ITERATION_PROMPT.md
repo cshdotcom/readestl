@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.6.2）
+# Readest Lite — 持续迭代助手提示词（v8.7.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -27,6 +27,7 @@
 15. **v8.4：Per-user 加密 vault — 服务端托管密钥 + AES-GCM 加密**
 16. **v8.5：配额 enforce + 真实配额 UI + SSRF 黑名单 + fire-and-forget 下载**
 17. **v8.6：合并上游 0.11.12 + 图片保存 + 分享永久/自定义有效期 + 下载任务队列**
+18. **v8.7：跨设备下载任务队列（DownloadTask 表 · 暂停/恢复/重试 · 5s 轮询 · 异步后台下载）**
 
 ---
 
@@ -34,7 +35,31 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.6.2`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.7.0`
+
+---
+
+## v8.7 改动清单
+
+### v8.7.0 — 跨设备下载任务队列
+
+- Prisma schema 新增 `DownloadTask` 表（id, userId, url, filename, status, error, bookHash, fileSize, createdAt/startedAt/completedAt）
+- API 路由：
+  - `GET /api/download-tasks` — 列表
+  - `POST /api/download-tasks` — 创建（异步后台 fetch → 写 File + Book 表 → 更新状态）
+  - `DELETE /api/download-tasks/[id]` — 删除
+  - `POST /api/download-tasks/[id]` — 重试/暂停/恢复
+  - `POST /api/download-tasks/batch` — 批量：retry_failed/pause_all/resume_all/clear_completed/clear_failed/clear_all
+- 前端 `DownloadTasks.tsx` 组件（用户中心）：5s 轮询、状态图标、批量按钮、单条操作、URL 复制
+- `RemoteDownloadDialog` 简化：POST 创建后 toast 提示去用户中心查看
+
+### v8.7.0 CI 修复（3 个 follow-up commit）
+
+1. `78c0deb` — 移除 `[id]/route.ts` 未使用的 `ALLOWED_EXTENSIONS`（TS `noUnusedLocals`）
+2. `78c0deb` — 移除 `DownloadTasks.tsx` 未使用的 `IoAlertCircleOutline` import（同上）
+3. `e43a3a0` — `eventDispatcher.off('refresh-library', handleRefreshLibrary)` 传 2 个参数（API 签名要求 event + callback）
+
+**最终可用 commit**：`e43a3a0`（v8.7.0 tag 重新指向此 commit）
 
 ---
 
@@ -94,7 +119,7 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 - vaultState.ts 不能删
 - VaultContext 必须在 AuthProvider 内
 - 代理路由已移除白名单（SSRF 黑名单）
-- RemoteDownloadDialog 用 transferStore 队列 + eventDispatcher.dispatch('refresh-library')
+- RemoteDownloadDialog 用 POST 创建 task + eventDispatcher.dispatch('refresh-library')（v8.7 起，不用 transferStore）
 - 分享有效期：0=永久，1-365=正常
 - `git -C` 确保在正确目录操作，不要把 workspace/ 提交到 readest-lite
 - husky hooks 用 `-c core.hooksPath=/dev/null` 跳过
@@ -103,14 +128,15 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ## CI 失败排查
 
-1. TS 未使用变量/import → 删除
-2. useQuotaStats 不要用 user?.storageQuotaMB
-3. handleLogout async 必须 await
-4. VaultContext 在 AuthProvider 内
-5. useUserActions 不 import useEnv/envConfig
-6. 代理路由不加回 ALLOWED_HOSTS
-7. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
-8. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
+1. TS 未使用变量/import → 删除（v8.7.0 踩过 `ALLOWED_EXTENSIONS` / `IoAlertCircleOutline`）
+2. `eventDispatcher.off(name, cb)` 必须传 2 个参数（v8.7.0 踩过）—— 如需 inline cb 请先抽成 `useCallback`
+3. useQuotaStats 不要用 user?.storageQuotaMB
+4. handleLogout async 必须 await
+5. VaultContext 在 AuthProvider 内
+6. useUserActions 不 import useEnv/envConfig
+7. 代理路由不加回 ALLOWED_HOSTS
+8. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
+9. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
 
 ---
 
@@ -123,8 +149,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.6.2
+**版本**：v8.7.0
 **最后更新**：2026-06-21
-**适用 commit**：`2f3b90a` 及之后
+**适用 commit**：`e43a3a0` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.6.2` / `8.6` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.7.0` / `8.7` / `latest`
