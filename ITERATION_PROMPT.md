@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.7.0） 
+# Readest Lite — 持续迭代助手提示词（v8.8.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -28,6 +28,7 @@
 16. **v8.5：配额 enforce + 真实配额 UI + SSRF 黑名单 + fire-and-forget 下载**
 17. **v8.6：合并上游 0.11.12 + 图片保存 + 分享永久/自定义有效期 + 下载任务队列**
 18. **v8.7：跨设备下载任务队列（DownloadTask 表 · 暂停/恢复/重试 · 5s 轮询 · 异步后台下载）**
+19. **v8.8：分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）**
 
 ---
 
@@ -35,7 +36,27 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.7.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.8.0`
+
+---
+
+## v8.8 改动清单
+
+### v8.8.0 — 分块上传规避 Cloudflare 524 超时
+
+**问题**：用户走 Cloudflare 反代访问时，大文件上传超 CF 100 秒硬性超时，返回 524。浏览器报：`File upload failed: Error: Upload failed with status 524`。
+
+**修复**：客户端 `webUpload` 把 >5MB 文件切成 5MB 块，串行 PUT 每块。服务端 `_put.ts` 新增三个分支：
+- `merge=1&total=M` → `mergePartsForKey` 流式合并 parts
+- `index=N&total=M` → `createPartWriteStream` 写第 N 块到 `<fileKey>.parts/<NNNNN>`
+- 无额外参数 → 原整传路径（小文件 + Tauri）
+
+**关键实现**：
+- `localStorage.ts::createPartWriteStream` — `index===0` 时先清空 parts 目录（避免重试上传残留旧 part）
+- `localStorage.ts::mergePartsForKey` — 用 `Readable.from(async generator)` + `pipeline` 流式 concat，不 buffer 整文件到内存
+- `transfer.ts::webUpload` — 进度回调跨块累计，URL 解析用 `window.location.href` 作 base
+
+**向后兼容**：小文件、Tauri 端、旧客户端向新服务端整传 — 全部不受影响。
 
 ---
 
@@ -137,6 +158,7 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 7. 代理路由不加回 ALLOWED_HOSTS
 8. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
 9. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
+10. **上传大文件必须分块**（v8.8）—— 不要走整文件 PUT，CF 100s 超时会返 524；块大小 5MB，index=0 时服务端自动清理上次失败残留的 parts
 
 ---
 
@@ -149,8 +171,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.7.0
+**版本**：v8.8.0
 **最后更新**：2026-06-21
-**适用 commit**：`e43a3a0` 及之后
+**适用 commit**：`8527223` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.7.0` / `8.7` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`
