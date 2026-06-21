@@ -77,6 +77,7 @@
       <ul class="nav-links">
         <li><a href="#features">功能</a></li>
         <li><a href="#iteration">迭代</a></li>
+        <li><a href="#roadmap">计划</a></li>
         <li><a href="#diff">改动</a></li>
         <li><a href="/readestl/deploy.html">部署</a></li>
         <li><a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -198,6 +199,35 @@
         <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>
         <article class="f-card rv"><div class="f-ico b">&#128187;</div><h3>CI 守护</h3><p>每次 push 自动跑 Docker 镜像构建 + smoke test，失败即阻塞合并。你拉到的每个镜像都验证过启动 + 登录 + API 响应。</p></article>
         <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>原版对齐</h3><p>持续跟进上游 Readest 的内核升级，新格式支持、新 TTS 引擎、新批注能力都会第一时间落地到 Lite。</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="roadmap">
+    <div class="sec-in">
+      <div class="sec-hd rv"><div class="sec-tag">未来计划</div><h2 class="sec-t">路线图：下一步去哪</h2><p class="sec-d">透明公开迭代方向，用户可追踪进度、提建议、参与讨论。</p></div>
+      <div class="f-grid">
+        <article class="f-card rv" style="border-color:rgba(108,92,231,.3)"><div class="f-ico p">&#128640;</div><h3>计划中</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--fg2);line-height:2">
+          <li>&#9654; <strong>SQLite → PostgreSQL 迁移</strong>：支持更大规模部署，多容器共享数据库</li>
+          <li>&#9654; <strong>PostgreSQL 对象存储</strong>：替代本地文件系统，支持 S3 兼容存储</li>
+          <li>&#9654; 远程下载任务队列同步 + 重试机制完善</li>
+          <li>&#9654; 配额 enforce 增强（per-user 存储配额 UI 优化）</li>
+        </ul></article>
+        <article class="f-card rv" style="border-color:rgba(0,184,148,.3)"><div class="f-ico g">&#9989;</div><h3>已完成</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--fg2);line-height:2">
+          <li>&#10003; v8.6 合并上游 0.11.12 + 图片保存 + 分享永久</li>
+          <li>&#10003; v8.5 配额 enforce + 真实配额 UI + SSRF 黑名单</li>
+          <li>&#10003; v8.4 Per-user 加密 vault（AES-GCM）</li>
+          <li>&#10003; v8.3 账号切换数据隔离</li>
+          <li>&#10003; v8.2 代理开关 + Readest Lite 品牌</li>
+          <li>&#10003; v8.1 远程下载修复 + ADMIN_USERNAME</li>
+          <li>&#10003; v8.0 代理强制登录</li>
+          <li>&#10003; v7.0 多用户管理 + Edge TTS + 字体本地化</li>
+        </ul></article>
+        <article class="f-card rv" style="border-color:rgba(255,95,87,.2);opacity:.7"><div class="f-ico pk">&#10060;</div><h3>已放弃</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--muted);line-height:2">
+          <li>&#10005; WebSearchPopup 悬浮窗（X-Frame-Options 拒绝 iframe）</li>
+          <li>&#10005; 代理路由白名单（改为 SSRF 黑名单）</li>
+          <li>&#10005; sync config 跨设备同步（改为设备本地保留）</li>
+        </ul></article>
       </div>
     </div>
   </section>
