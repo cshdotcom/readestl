@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Readest Lite — 轻量自部署，阅读无界</title>
-  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。v8.8：分块上传规避 Cloudflare 524 超时，大文件上传不再中断。支持 EPUB/PDF/MOBI、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署，持续高频迭代。">
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。v8.9：下载任务进度条/速度/ETA/用时、完整日志、批量下载、自动重命名（base64/中文/Content-Disposition）、Cookie + Custom Headers 高级选项。支持 EPUB/PDF/MOBI、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署，持续高频迭代。">
   <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储,多用户,远程下载,Web搜索,Edge TTS,翻译代理">
   <meta name="author" content="cshdotcom">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -97,7 +97,7 @@
       <div class="hero-text">
         <div class="hero-badge"><span class="dot"></span>基于 Readest 二开 · 轻量自部署</div>
         <h1>轻量自部署<br><span class="gt">阅读无界</span></h1>
-        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v8.8 分块上传规避 Cloudflare 524 超时，大文件上传不再中断；服务端流式合并，内存零占用。单容器 Docker 部署，数据完全自主。</p>
+        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v8.9 下载任务大增强：进度条/速度/ETA/用时、点击看完整日志、批量下载、自动重命名（base64/中文/Content-Disposition）、Cookie + Custom Headers 高级选项。单容器 Docker 部署，数据完全自主。</p>
         <div class="hero-actions">
           <a href="/readestl/deploy.html" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>一键部署</a>
           <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a>
@@ -137,10 +137,10 @@
         <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>实际无上限存储</h3><p>100TB 软上限（不强制），实际只受磁盘空间约束。书籍、封面存于本地挂载卷，数据完全自主。</p></article>
       </div>
 
-      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 新增</span></h3>
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 · v8.9 新增</span></h3>
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。<strong>v8.4：Per-user 加密 vault</strong>，library/settings 按 userId AES-GCM 加密，密码不存客户端，跨账号彻底隔离。<strong>v8.5：配额真正 enforce</strong>，超额上传/翻译被拒绝。普通用户独立空间，互不干扰。</p></article>
-        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.6：任务队列</strong>，有进度/状态/重试。<strong>v8.7：DownloadTask 表落库 + 用户中心面板</strong>，5s 轮询、批量操作、跨设备同步可见。<strong>v8.8：分块上传</strong>，大文件不再被 Cloudflare 524 超时打断。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.6：任务队列</strong>，有进度/状态/重试。<strong>v8.7：DownloadTask 表落库 + 用户中心面板</strong>，5s 轮询、批量操作、跨设备同步可见。<strong>v8.8：分块上传</strong>，大文件不被 CF 524 超时打断。<strong>v8.9：进度条/速度/ETA/用时 + 完整日志 + 批量下载 + 自动重命名 + Cookie/Headers 高级选项</strong>。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 全部走服务器代理，客户端无需加速器。<strong>v8.0：强制登录</strong>。<strong>v8.2：可关代理</strong>。<strong>v8.5：SSRF 黑名单</strong>。</p></article>
         <article class="f-card rv"><div class="f-ico b">&#128218;</div><h3>原版词典悬浮窗</h3><p>选中文字点「Dictionary」弹悬浮窗显示 Wikipedia/Wiktionary 查询结果，点「Translate」弹翻译悬浮窗。保留原版 Readest 完整体验，代理透传。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色，零成本零依赖。</p></article>
@@ -193,7 +193,7 @@
     <div class="sec-in">
       <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">每周一个版本，永远在变好</h2><p class="sec-d">这不是一个"上线即弃"的项目。我们以周为节奏迭代，每个版本都解决真实用户反馈的问题。</p></div>
       <div class="f-grid">
-        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每个版本都打 git tag。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524、v8.9 下载进度/日志/批量/自动重命名/Cookie 高级选项，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每个版本都打 git tag。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128736;</div><h3>社区驱动</h3><p>用户反馈的 bug 和功能建议直接进迭代队列。从 100TB 配额、字体本地化到 DeepL 切换，每项都源自真实部署场景。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128260;</div><h3>零停机升级</h3><p>SQLite 自动迁移、数据卷持久化，<code>docker compose pull &amp;&amp; up -d</code> 一条命令完成升级，旧数据无损。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>
@@ -213,6 +213,7 @@
           <li>&#9654; <strong>PostgreSQL 对象存储</strong>：替代本地文件系统，支持 S3 兼容存储</li>
         </ul></article>
         <article class="f-card rv" style="border-color:rgba(0,184,148,.3)"><div class="f-ico g">&#9989;</div><h3>已完成</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--fg2);line-height:2">
+          <li>&#10003; v8.9 下载进度/速度/ETA/用时 + 完整日志 + 批量下载 + 自动重命名 + Cookie/Headers 高级选项</li>
           <li>&#10003; v8.8 分块上传规避 Cloudflare 524 超时（5MB/块 · 流式合并）</li>
           <li>&#10003; v8.7 跨设备下载任务队列（DownloadTask 表 + 用户中心面板 + 5s 轮询）</li>
           <li>&#10003; v8.6 合并上游 0.11.12 + 图片保存 + 分享永久 + 下载任务队列</li>

@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.8.0）
+# Readest Lite — 持续迭代助手提示词（v8.9.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -29,6 +29,7 @@
 17. **v8.6：合并上游 0.11.12 + 图片保存 + 分享永久/自定义有效期 + 下载任务队列**
 18. **v8.7：跨设备下载任务队列（DownloadTask 表 · 暂停/恢复/重试 · 5s 轮询 · 异步后台下载）**
 19. **v8.8：分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）**
+20. **v8.9：下载任务增强（进度条/速度/ETA/用时 · 点击看完整日志 · 批量下载 · 自动重命名（base64/中文/Content-Disposition）· 高级选项（Cookie + Custom Headers））**
 
 ---
 
@@ -36,7 +37,37 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.8.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.9.0`
+
+---
+
+## v8.9 改动清单
+
+### v8.9.0 — 下载任务增强
+
+**问题背景**：用户要求：下载进度条、速度、ETA、用时、完整日志（点击任务弹出）、批量下载、自动重命名（base64/中文/查询参数）、Cookie + Custom Headers 高级选项。
+
+**架构**：
+- `filenameDetect.ts` — 智能文件名识别（优先级：Content-Disposition > URL path > URL query `file=` > base64 > Content-Type > fallback）
+- `downloadRunner.ts` — 共享下载执行器（被 create/retry/batch 共用）
+  - 流式读取 `response.body.getReader()`
+  - 每秒 throttle 写库 progress/downloadedBytes/totalBytes/speedBps/etaSeconds
+  - 每 2 秒独立检查暂停状态（不被进度更新干扰）
+  - 完整日志写入 DownloadLog 表（info/warn/error）
+- 新增 API `GET /api/download-tasks/[id]/logs` 返回任务日志
+- POST `/api/download-tasks` 加 `cookies` / `headers` / `batch` 字段
+- `RemoteDownloadDialog` 重写：Tab（Single/Batch）+ Advanced Options（Cookie + Headers）
+- `DownloadTasks.tsx` 加 progress bar、速度、ETA、用时，点击行打开详情 Modal
+- 新增 `DownloadTaskDetailModal.tsx` 显示完整日志（筛选 All/INFO/WARN/ERROR + Auto-scroll）
+
+### v8.9.0 CI 修复
+
+1. `94cc02c` — `filenameDetect.ts` `noUncheckedIndexedAccess` 守卫
+   - `starMatch[1]` → 加 `starMatch && starMatch[1]` 守卫
+   - `plainMatch[1]` → 加 `plainMatch && plainMatch[1]` 守卫
+   - `split(';')[0]` → 用中间变量 + `|| ''` 兑底
+
+**最终可用 commit**：`94cc02c`（v8.9.0 tag 指向此 commit）
 
 ---
 
@@ -159,6 +190,9 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 8. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
 9. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
 10. **上传大文件必须分块**（v8.8）—— 不要走整文件 PUT，CF 100s 超时会返 524；块大小 5MB，index=0 时服务端自动清理上次失败残留的 parts
+11. **`noUncheckedIndexedAccess`**（v8.9 踩过）—— `@sindresorhus/tsconfig` 启用此项，所有 `array[N]` 返回 `T | undefined`，必须加 `&& arr[N]` 守卫或用 `?.` 链。`regex.match(...)[N]` 和 `str.split(...)[N]` 都要守卫。
+12. **React 组件父传函数 prop**（v8.9 踩过）—— 父组件每次重渲染会传入新函数引用，如果该函数在子组件 useEffect deps 里，会导致无限循环。解法：子组件用 `useRef` 存最新函数，effect 只依赖真正的状态变量。
+13. **下载任务表格 schema 变更必须考虑 prisma db push**（v8.9）—— 新增字段默认值要能向后兼容现有 row（用 `@default(0)` 或 `?`）。`onDelete: Cascade` 确保删 task 自动删关联的 DownloadLog。
 
 ---
 
@@ -171,8 +205,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.8.0
-**最后更新**：2026-06-21
-**适用 commit**：`8527223` 及之后
+**版本**：v8.9.0
+**最后更新**：2026-06-22
+**适用 commit**：`94cc02c` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.9.0` / `8.9` / `latest`
