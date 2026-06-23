@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.9.0）
+# Readest Lite — 持续迭代助手提示词（v8.10.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -30,6 +30,7 @@
 18. **v8.7：跨设备下载任务队列（DownloadTask 表 · 暂停/恢复/重试 · 5s 轮询 · 异步后台下载）**
 19. **v8.8：分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）**
 20. **v8.9：下载任务增强（进度条/速度/ETA/用时 · 点击看完整日志 · 批量下载 · 自动重命名（base64/中文/Content-Disposition）· 高级选项（Cookie + Custom Headers））**
+21. **v8.10：中文汉化 + 笔记链接手机默认走 web reader + 登出清空残留 library.json + 阅读统计（总/今日/本周 + 书榜） + 下载记录折叠**
 
 ---
 
@@ -37,7 +38,35 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.9.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.0`
+
+---
+
+## v8.10 改动清单
+
+### v8.10.0 — 中文汉化 + 笔记链接手机修复 + 登出安全 + 阅读统计 + 下载折叠
+
+**1. 中文汉化（zh-CN + zh-TW）**
+- 补全 v8.7-v8.9 所有新增字符串的中文翻译（60 个 key）
+
+**2. 笔记导出链接手机修复**
+- `/o/page.tsx`：手机默认直接跳 web reader，不再尝试启动 App
+- `useOpenAnnotationLink.ts`：书不在库里时导航到书库页
+
+**3. 登出后残留书籍修复**
+- `handleLogout`：清空 `library.json` + 重置 `libraryLoaded`
+- `library/page.tsx`：加 `user/token` 守卫
+
+**4. 阅读统计功能**
+- `GET /api/stats/aggregate` 端点
+- `ReadingStatsCard.tsx`：横向滚动卡片 + 点击打开 Modal
+- `ReadingStatsModal.tsx`：Tab + 书榜排序 + 渐变进度条 + 搜索
+
+**5. 下载记录折叠**
+- `DownloadTasks.tsx` 默认只显 3 条 + 「查看全部」按钮
+- `DownloadTasksModal.tsx` 完整列表
+
+**最终可用 commit**：`fa35e84`
 
 ---
 
@@ -205,8 +234,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.9.0
-**最后更新**：2026-06-22
-**适用 commit**：`94cc02c` 及之后
+**版本**：v8.10.0
+**最后更新**：2026-06-23
+**适用 commit**：`fa35e84` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.9.0` / `8.9` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.0` / `8.10` / `latest`
