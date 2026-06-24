@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.10.1）
+# Readest Lite — 持续迭代助手提示词（v8.10.2）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -32,6 +32,7 @@
 20. **v8.9：下载任务增强（进度条/速度/ETA/用时 · 点击看完整日志 · 批量下载 · 自动重命名（base64/中文/Content-Disposition）· 高级选项（Cookie + Custom Headers））**
 21. **v8.10：中文汉化 + 笔记链接手机默认走 web reader + 登出清空残留 library.json + 阅读统计（总/今日/本周 + 书榜） + 下载记录折叠**
 22. **v8.10.1：批量下载 per-URL Cookie/Headers 语法（URL | cookie:VALUE | header:Key: VALUE）**
+23. **v8.10.2：笔记导出链接绝对 URL 修复（站外可点击）+ Reader 书不在库里时自动重试加载 + 用户管理折叠**
 
 ---
 
@@ -39,7 +40,27 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.1`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.2`
+
+---
+
+## v8.10.2 改动清单
+
+### v8.10.2 — 笔记链接修复 + 用户管理折叠
+
+**1. 笔记导出链接打不开（核心 bug）**
+- 问题：`buildAnnotationWebUrl` 用构建期 `READEST_WEB_BASE_URL`（Readest Lite 里为 `''`），导出链接是相对路径 `/o/book/...`，站外点不开
+- 修复：新增 `resolveWebBaseUrl()` 运行时解析，优先用 `runtimeConfig.apiBaseUrl`（`PUBLIC_BASE_URL` 注入），回退 `window.location.origin`
+- 导出链接现在永远是绝对 URL
+
+**2. Reader 书不在库里时自动重试**
+- 问题：用户从笔记链接进入 `/reader/{hash}`，内存 library 还没加载完，`getBookByHash` 返回 undefined，报「无法打开书籍」
+- 修复：`initViewState` 失败时调 `appService.loadLibraryBooks()` 重读磁盘，找到继续，找不到才报错
+
+**3. 用户管理折叠**
+- `UserManagement.tsx` 默认只显 3 个用户，「查看全部」按钮打开 `AllUsersModal`
+
+**最终可用 commit**：`6cf4ad7`
 
 ---
 
@@ -254,8 +275,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.10.1
-**最后更新**：2026-06-23
-**适用 commit**：`839d7fc` 及之后
+**版本**：v8.10.2
+**最后更新**：2026-06-24
+**适用 commit**：`6cf4ad7` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.1` / `8.10` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.2` / `8.10` / `latest`
