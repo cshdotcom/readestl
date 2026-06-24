@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.10.0）
+# Readest Lite — 持续迭代助手提示词（v8.10.1）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -31,6 +31,7 @@
 19. **v8.8：分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）**
 20. **v8.9：下载任务增强（进度条/速度/ETA/用时 · 点击看完整日志 · 批量下载 · 自动重命名（base64/中文/Content-Disposition）· 高级选项（Cookie + Custom Headers））**
 21. **v8.10：中文汉化 + 笔记链接手机默认走 web reader + 登出清空残留 library.json + 阅读统计（总/今日/本周 + 书榜） + 下载记录折叠**
+22. **v8.10.1：批量下载 per-URL Cookie/Headers 语法（URL | cookie:VALUE | header:Key: VALUE）**
 
 ---
 
@@ -38,7 +39,26 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.1`
+
+---
+
+## v8.10.1 改动清单
+
+### v8.10.1 — 批量下载 per-URL Cookie/Headers 语法
+
+**问题**：v8.9 批量下载只支持一组全局 Cookie/Headers，不同网站要分多次提交。
+
+**解决**：扩展 textarea 语法：
+```
+# 注释
+https://site-a.com/book.epub | cookie:sessionid=abc123
+https://site-b.com/book.epub | cookie:PHPSESSID=def | header:Referer: https://site-b.com
+```
+
+**合并逻辑**：per-URL 指令优先，没有指令的 URL 回退到全局 Advanced Options 里的 Cookie/Headers。
+
+**向后兼容**：API 同时接受 `items: [{ url, cookies?, headers? }]` 和旧版 `urls: string[] + 全局 cookies/headers`。
 
 ---
 
@@ -234,8 +254,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.10.0
+**版本**：v8.10.1
 **最后更新**：2026-06-23
-**适用 commit**：`fa35e84` 及之后
+**适用 commit**：`839d7fc` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.0` / `8.10` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.1` / `8.10` / `latest`
