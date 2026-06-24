@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.10.2）
+# Readest Lite — 持续迭代助手提示词（v8.10.3）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -33,6 +33,7 @@
 21. **v8.10：中文汉化 + 笔记链接手机默认走 web reader + 登出清空残留 library.json + 阅读统计（总/今日/本周 + 书榜） + 下载记录折叠**
 22. **v8.10.1：批量下载 per-URL Cookie/Headers 语法（URL | cookie:VALUE | header:Key: VALUE）**
 23. **v8.10.2：笔记导出链接绝对 URL 修复（站外可点击）+ Reader 书不在库里时自动重试加载 + 用户管理折叠**
+24. **v8.10.3：登出后隐藏全部书籍（修复 demo books 残留）+ 移出分组不再踢出用户（修复 group-empty auto-navigate）**
 
 ---
 
@@ -40,7 +41,24 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.2`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.10.3`
+
+---
+
+## v8.10.3 改动清单
+
+### v8.10.3 — 登出隐藏全部书籍 + 移出分组不再踢出用户
+
+**1. 登出后书籍全部隐藏（修复 demo books 残留）**
+- 问题：登出后个别书还显示
+- 根因：demoBooks effect 在 libraryLoaded=true 时重新添加 demo books，登出后 libraryLoaded 被 initLibrary 重设为 true，demoBooks state 还在 → effect 触发 → demo books 加回来
+- 修复：demoBooks effect 加 !token || !user 守卫
+
+**2. 移出分组不再踢出用户（修复 group-empty auto-navigate）**
+- 问题：用户在分组里把最后一本书移出 → currentBookshelfItems.length === 0 → 立即 updateUrlParams({ group: null }) → 被踢回根书库 → 再点进去又被踢出
+- 修复：只在 getGroupName(groupId) 返回空（group 真被删了）才导航走；group 暂时为空时显示空状态提示
+
+**最终可用 commit**：`e16f7b9`
 
 ---
 
@@ -275,8 +293,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.10.2
+**版本**：v8.10.3
 **最后更新**：2026-06-24
-**适用 commit**：`6cf4ad7` 及之后
+**适用 commit**：`e16f7b9` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.2` / `8.10` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.10.3` / `8.10` / `latest`
