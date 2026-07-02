@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.11.0）
+# Readest Lite — 持续迭代助手提示词（v8.12.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -36,6 +36,7 @@
 24. **v8.10.3：登出后隐藏全部书籍（修复 demo books 残留）+ 移出分组不再踢出用户（修复 group-empty auto-navigate）**
 25. **v8.10.4：恢复跨设备视图设置同步（可选）— 用户中心 → Manage Sync → View Settings toggle**
 26. **v8.11.0：合并上游 v0.11.17（Markdown 渲染 + PDF 对比度 + TTS 粒度 + 最近阅读书架 + foliate-js 自动更新）**
+27. **v8.12.0：完整上游 v0.11.17 源码级同步（200+ 文件）+ 双击选词 + Google Drive/WebDAV 同步 UI + Sticky progress bar + 所有 reader/settings/OPDS 组件同步**
 
 ---
 
@@ -43,7 +44,23 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.11.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.12.0`
+
+---
+
+## v8.12.0 改动清单
+
+### v8.12.0 — 完整上游 v0.11.17 源码级同步
+
+从上游 Readest v0.11.17 进行完整源码级同步（200+ 文件），不再使用 cherry-pick。
+
+**新增功能**：双击选词、Markdown 渲染、PDF 对比度、TTS 粒度、最近阅读书架、Sticky progress bar、Google Drive/WebDAV 同步 UI、File sync engine、Annotation 导出筛选、自动翻页角落上限、清理空高亮、foliate-js 自动更新
+
+**同步的文件**：所有 reader 组件/hooks/utils、所有 settings 组件、所有 OPDS 组件、所有 store、所有 utils（17 个）、所有 services（sync/providers/file/transformers/dictionaries）、所有 types、所有 hooks、所有 helpers/styles/middleware
+
+**Lite 自定义保留**：VaultProvider、PHContext（safe atob）、本地 JWT 认证、Prisma + SQLite、本地文件存储、登出清空、用户/demo 守卫、syncViewSettings、Bookshelf group-empty 修复、deeplink resolveWebBaseUrl、proxyEnabled、WebDAVSyncLogEntry 类型
+
+**最终可用 commit**：`78822ed`
 
 ---
 
@@ -330,8 +347,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.11.0
-**最后更新**：2026-06-30
-**适用 commit**：`aca02d3` 及之后
+**版本**：v8.12.0
+**最后更新**：2026-07-02
+**适用 commit**：`78822ed` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.11.0` / `8.11` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.12.0` / `8.12` / `latest`
