@@ -36,7 +36,7 @@
 24. **v8.10.3：登出后隐藏全部书籍（修复 demo books 残留）+ 移出分组不再踢出用户（修复 group-empty auto-navigate）**
 25. **v8.10.4：恢复跨设备视图设置同步（可选）— 用户中心 → Manage Sync → View Settings toggle**
 26. **v8.11.0：合并上游 v0.11.17（Markdown 渲染 + PDF 对比度 + TTS 粒度 + 最近阅读书架 + foliate-js 自动更新）**
-27. **v8.12.0：完整上游 v0.11.17 源码级同步（200+ 文件）+ 双击选词 + Google Drive/WebDAV 同步 UI + Sticky progress bar + 所有 reader/settings/OPDS 组件同步**
+27. **v8.12.0：逐文件对比同步上游 v0.11.17（163 文件复制 + 21 新文件 + 58 Lite 自定义保留 + Google Drive/payment 排除）**
 
 ---
 
@@ -50,17 +50,20 @@
 
 ## v8.12.0 改动清单
 
-### v8.12.0 — 完整上游 v0.11.17 源码级同步
+### v8.12.0 — 逐文件对比同步上游 v0.11.17
 
-从上游 Readest v0.11.17 进行完整源码级同步（200+ 文件），不再使用 cherry-pick。
+**方法**：逐文件对比 Lite 和上游 v0.11.17，分类处理：
+- 163 个安全文件：直接从上游复制
+- 21 个新文件：从上游添加（排除 Google Drive/payment/tests）
+- 58 个 Lite 自定义文件：**绝不覆盖**，只手动添加缺失字段
 
-**新增功能**：双击选词、Markdown 渲染、PDF 对比度、TTS 粒度、最近阅读书架、Sticky progress bar、Google Drive/WebDAV 同步 UI、File sync engine、Annotation 导出筛选、自动翻页角落上限、清理空高亮、foliate-js 自动更新
+**Lite 自定义保留**：VaultProvider、PHContext、本地 JWT 认证、Prisma+SQLite、本地文件存储、登出清空、用户/demo 守卫、syncViewSettings、Bookshelf group-empty 修复、deeplink resolveWebBaseUrl、proxyEnabled、WebDAVSyncLogEntry、下载任务、阅读统计、用户管理、RemoteDownloadDialog、所有 pages/api/*
 
-**同步的文件**：所有 reader 组件/hooks/utils、所有 settings 组件、所有 OPDS 组件、所有 store、所有 utils（17 个）、所有 services（sync/providers/file/transformers/dictionaries）、所有 types、所有 hooks、所有 helpers/styles/middleware
+**排除**：Google Drive、Stripe/Apple/payment、所有 __tests__
 
-**Lite 自定义保留**：VaultProvider、PHContext（safe atob）、本地 JWT 认证、Prisma + SQLite、本地文件存储、登出清空、用户/demo 守卫、syncViewSettings、Bookshelf group-empty 修复、deeplink resolveWebBaseUrl、proxyEnabled、WebDAVSyncLogEntry 类型
+**手动添加的类型字段**：webtoonMode、showStickyProgressBar、wordLensGlossFontSize/Color、SearchMode、mode、abandoned、coverHash/coverUpdatedAt、fraction、deletedAt+updatedAt(ProofreadRule)、nearbyWords、segments+emphasized+text(SearchExcerpt)、refresh(HardwarePageTurner)、biometricUnlockEnabled、WebDAVBrowseSortByType、browseSortBy/browseSortAscending、synced_at/uploaded_at/downloaded_at(BookDataRecord)
 
-**最终可用 commit**：`78822ed`
+**最终可用 commit**：`e85e8ce`
 
 ---
 
@@ -349,6 +352,6 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 **版本**：v8.12.0
 **最后更新**：2026-07-02
-**适用 commit**：`78822ed` 及之后
+**适用 commit**：`e85e8ce` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
 **镜像**：`ghcr.io/cshdotcom/readest-lite:8.12.0` / `8.12` / `latest`
