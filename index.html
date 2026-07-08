@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Readest Lite — 轻量自部署，阅读无界</title>
-  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。v8.12.2：防御性文件名生成 + 上传/下载错误响应体加 hint/received 字段。支持 EPUB/PDF/MOBI/MD、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署，持续高频迭代。">
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。v8.13：上游 v0.11.18 非覆盖式合入（Auto Scroll + 中键滚动 + 翻页动画 + TTS mini player + 词典朗读 + 主题分段控件 + 校对开关 + OPDS 爬取 + Calibre 自定义列 + 按进度排序）。支持 EPUB/PDF/MOBI/MD、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署，持续高频迭代。">
   <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储,多用户,远程下载,Web搜索,Edge TTS,翻译代理">
   <meta name="author" content="cshdotcom">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -97,7 +97,7 @@
       <div class="hero-text">
         <div class="hero-badge"><span class="dot"></span>基于 Readest 二开 · 轻量自部署</div>
         <h1>轻量自部署<br><span class="gt">阅读无界</span></h1>
-        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v8.12.2 防御性文件名生成（即使未来代码回归也永不返回空串）+ 上传/下载错误响应体加 <code>hint</code>/<code>received</code> 字段方便诊断。v8.12.1 紧急修复 v8.12.0 误覆盖 Lite 自定义代码。v8.12 全量同步上游 v0.11.17。单容器 Docker 部署，数据完全自主。</p>
+        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v8.13 非覆盖式合入上游 Readest v0.11.18：Auto Scroll 阅读模式 + 中键自动滚动 + 翻页动画 + PDF 暗色模式页眉页脚 + TTS 大改版（无缝 Web Audio + 关书继续播放 + mini player + 词典朗读按钮）+ 主题分段控件 + 校对规则开关 + OPDS 子目录爬取 + Calibre 自定义列 + 按阅读进度排序。单容器 Docker 部署，数据完全自主。</p>
         <div class="hero-actions">
           <a href="/readestl/deploy.html" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>一键部署</a>
           <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a>
@@ -213,6 +213,7 @@
           <li>&#9654; <strong>PostgreSQL 对象存储</strong>：替代本地文件系统，支持 S3 兼容存储</li>
         </ul></article>
         <article class="f-card rv" style="border-color:rgba(0,184,148,.3)"><div class="f-ico g">&#9989;</div><h3>已完成</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--fg2);line-height:2">
+          <li>&#10003; v8.13 上游 v0.11.18 非覆盖式合入（Auto Scroll + 中键滚动 + 翻页动画 + TTS mini player + 词典朗读 + 主题分段控件 + 校对开关 + OPDS 爬取 + Calibre 自定义列 + 按进度排序）</li>
           <li>&#10003; v8.12.2 防御性文件名生成 + 上传/下载错误响应体加 hint/received 字段</li>
           <li>&#10003; v8.12.1 紧急修复 v8.12.0 误覆盖 Lite 自定义（下载报 File not found + 关于弹官方页面）</li>
           <li>&#10003; v8.12 上游 v0.11.17 全量同步（163 文件复制 + 21 新文件 + 58 Lite 自定义保留 + Google Drive/payment 排除）</li>
