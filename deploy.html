@@ -84,8 +84,9 @@
     <p class="subtitle">5 分钟完成部署，从 Docker 安装到上线运行，按顺序跟做即可。</p>
 
     <div class="note tip" style="margin-bottom:1.5rem">
-      <strong>v8.13 最新功能：</strong>
-      上游 Readest v0.11.18 <strong>非覆盖式合入</strong>（逐 PR 研究、逐文件改、不覆盖 Lite 自定义）· Auto Scroll 阅读模式（Shift+A，浮动控制条调速/暂停/退出）· 中键自动滚动 · 翻页动画（幻灯片/卷页）· PDF 暗色模式页眉页脚可读性 · 两指滚动 vs 捏合缩放区分 · View Transitions API 按运行时能力开关 · TTS 大改版（无缝 Web Audio 播放 + 关书继续播放 + mini player + 词典朗读按钮 + 睡眠定时器）· 主题分段控件 · 校对规则逐条开关 · OPDS 子目录爬取 + 自托管认证 · Calibre 自定义列 · 按阅读进度排序。<br>
+      <strong>v8.13.1 最新功能：</strong>
+      上游 Readest v0.11.18 <strong>非覆盖式合入补全</strong>：翻页动画（幻灯片/卷页，设置 → 动画样式）· <strong>修复「关于」页面版本号显示</strong>（之前卡在上游 0.11.4，现在显示 Lite 真实版本 8.13.1）· bookService 并发导入崩溃修复（createDir 幂等）。<br>
+      <strong>v8.13：</strong>上游 v0.11.18 非覆盖式合入（Auto Scroll + 中键滚动 + PDF 暗色模式页眉页脚 + 两指滚动 vs 捏合 + View Transitions API gating + TTS 大改版 + 主题分段控件 + 校对开关 + OPDS 爬取 + Calibre 自定义列 + 按进度排序）。<br>
       <strong>v8.12.2：</strong>防御性文件名生成 + 上传/下载错误响应体加 <code>hint</code>/<code>received</code> 字段方便诊断。<br>
       <strong>v8.12.1：</strong>紧急修复 v8.12.0 上游同步误覆盖 Lite 自定义代码：① 下载书籍报 "File not found"；② 「关于」按钮弹出官方 Readest 页面。<br>
       <strong>v8.12：</strong>上游 Readest v0.11.17 <strong>全量同步</strong>（163 文件复制 + 21 新文件 + 58 Lite 自定义保留）。<br>
@@ -166,7 +167,7 @@ docker --version</pre>
         <li><code>PORT</code>（可选，默认 8225）：容器内监听端口，一般不需修改</li>
         <li><code>DEEPL_ENABLED=true</code>（可选）：启用 DeepL 翻译，需配合 <code>DEEPL_FREE_API_KEYS</code> 或 <code>DEEPL_PRO_API_KEYS</code></li>
       </ul>
-      <div class="note tip">指定特定版本：<code>ghcr.io/cshdotcom/readest-lite:v8.13.0</code>（每个版本都有对应 git tag，详见 GitHub Releases）。</div>
+      <div class="note tip">指定特定版本：<code>ghcr.io/cshdotcom/readest-lite:v8.13.1</code>（每个版本都有对应 git tag，详见 GitHub Releases）。</div>
     </section>
 
     <section class="sec" id="compose">

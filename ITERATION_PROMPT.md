@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.12.0）
+# Readest Lite — 持续迭代助手提示词（v8.13.1）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -37,6 +37,10 @@
 25. **v8.10.4：恢复跨设备视图设置同步（可选）— 用户中心 → Manage Sync → View Settings toggle**
 26. **v8.11.0：合并上游 v0.11.17（Markdown 渲染 + PDF 对比度 + TTS 粒度 + 最近阅读书架 + foliate-js 自动更新）**
 27. **v8.12.0：逐文件对比同步上游 v0.11.17（163 文件复制 + 21 新文件 + 58 Lite 自定义保留 + Google Drive/payment 排除）**
+28. **v8.12.1：紧急修复 v8.12.0 误覆盖 Lite 自定义（getRemoteBookFilename 在 'local' 返回空串 → 下载报 File not found + AboutWindow 被覆盖成上游版本 → 关于弹官方页面）**
+29. **v8.12.2：防御性文件名生成（即使 getStorageType/book.format/book.title 异常也永不返回空串）+ 上传/下载失败响应体加 hint/received 字段方便诊断 + 放宽 download fallback parts.length 检查**
+30. **v8.13.0：上游 Readest v0.11.18 非覆盖式合入（Auto Scroll 阅读模式 + 中键自动滚动 + PDF 暗色模式页眉页脚 + 两指滚动 vs 捏合 + View Transitions API gating + TTS 大改版：无缝 Web Audio + 关书继续播放 + mini player + 词典朗读按钮 + 主题分段控件 + 校对规则开关 + OPDS 子目录爬取 + Calibre 自定义列 + 按阅读进度排序）**
+31. **v8.13.1：翻页动画（幻灯片/卷页，PR #4940 JS-only port）+ 修复「关于」页面版本号（package.json 0.11.4 → 8.13.1）+ bookService 并发导入崩溃修复（createDir 幂等，PR #4962）**
 
 ---
 
@@ -45,6 +49,69 @@
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
 - 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.12.0`
+
+---
+
+## v8.13.1 改动清单
+
+### v8.13.1 — 翻页动画 + 关于页面版本号修复 + bookService 崩溃修复
+
+**PR #4940 翻页动画（幻灯片/卷页）— JS-only port**：
+- 新增文件：`utils/pageCurl.ts`、`utils/pageSlide.ts`、`app/reader/hooks/useCapturedTurn.ts`、`app/reader/utils/capturedTurn.ts`
+- `types/book.ts`：新增 `PageTurnStyle` 类型 + `pageTurnStyle` 字段
+- `services/constants.ts`：`DEFAULT_VIEW_CONFIG` 加 `pageTurnStyle: 'push'`
+- `utils/bridge.ts`：加 `captureWebviewRegion`（web 端 reject，回退 CSS curl）
+- `FoliateViewer.tsx`：调用 `useCapturedTurn` + `applyPageTurnAttributes`，移除 inline no-swipe 块
+- `BooksGrid.tsx`：加 `data-view-transition-root` 属性
+- `ControlPanel.tsx`：加 Animation Style SettingsSelect（Push/Slide/Page Curl，按 `supportsViewTransitionGroup` gating）
+- 跳过原生代码（swift-rs/Rust/Kotlin/Swift）— Lite 是 web-only
+
+**PR #5000 gate captured slide/curl on scrollLocked**：已包含在复制的 `useCapturedTurn.ts` 中
+
+**PR #4962 bookService 崩溃修复**：`bookService.ts` 的 `createDir` 改为幂等递归（`createDir(path, base, true)`），修复并发导入竞争
+
+**关于页面版本号修复**：`apps/readest-app/package.json` version 从上游 `0.11.4` 改为 Lite 真实版本 `8.13.1`。`getAppVersion()` 读 `package.json.version`，AboutWindow 显示 `Version 8.13.1`
+
+**最终可用 commit**：待 CI 全绿后打 tag
+
+---
+
+## v8.13.0 改动清单
+
+### v8.13.0 — 上游 Readest v0.11.18 非覆盖式合入
+
+**方法**：逐 PR 研究、逐文件改、不覆盖 Lite 自定义代码。合入 19 个 PR，排除 15 个不适用 PR。
+
+**第一批 阅读器核心修复（7 PRs）**：
+- PR #4910 注解深链不同书切换（useOpenAnnotationLink + useBooksManager.openBookInReader + goToCfiWhenReady）
+- PR #4912 两指滚动 vs 捏合缩放（useIframeEvents 延迟决策 + 24px 死区）
+- PR #4911 PDF 暗色模式页眉页脚（mix-blend-difference）
+- PR #5001 页边距收缩到安全区（fixed-layout 用 text-base-content）
+- PR #4989 View Transitions API gating（新增 viewTransition.ts + supportsViewTransitionsAPI/Group）
+- PR #4955 中键自动滚动（新增 useMiddleClickAutoscroll + AutoscrollIndicator + autoscroller.ts）
+- PR #4998/#4999 Auto Scroll 阅读模式（新增 useAutoScroll + AutoScrollControl + PacedScroller + Shift+A 快捷键）
+
+**第二批 TTS 大改版（5 PRs）**：
+- PR #4931 Edge TTS 无缝 Web Audio（新增 WebAudioPlayer/pcm/timeStretch/ttsDuration/SectionTimeline）
+- PR #4941 关书继续播放（新增 TTSSessionManager + ttsMediaBridge + NowPlayingBar）
+- PR #4957 词典弹窗朗读按钮（新增 wordPronouncer）
+- PR #4994 Android TTS 媒体控制（TS 侧 only，移除 alwaysInForeground）
+- PR #4996 TTS mini player（新增 TTSMiniPlayer/TTSPlayerSheet/TTSScrubber，删除 TTSBar/TTSIcon/TTSPanel）
+
+**第三批 图书馆/UI/OPDS（7 PRs）**：
+- PR #4947 传输队列持久化（transferManager 加 clearCompleted/clearFailed/clearAll）
+- PR #4831/#4913 主题分段控件（ThemeModeSelector 重写）
+- PR #4859 校对规则开关（ProofreadRules 重写）
+- PR #4948 OPDS 子目录爬取（feedChecker + MAX_CRAWL_DEPTH）
+- PR #5002 OPDS 自托管认证（isPrivateHostAllowed + 400 重试 + skipSslVerification）
+- PR #4939 Calibre 自定义列（CalibreCustomColumn + formatCalibreColumnValue + getCalibreColumnsText）
+- PR #4427 按阅读进度排序（LibrarySortByType.Progress + getBookReadRatio）
+
+**foliate-js 类型声明**：新增 `src/foliate-js.d.ts`，声明 `getSentences`/`SentenceEntry`/`TTS`（TTS 声明为 `any` 类型匹配上游 allowJs 宽松推断）。解决 Lite Docker 构建（git clone）vs 上游（git submodule）的类型推断差异。
+
+**排除的 PR**：Sentry（#4914/#4929/#4952/#4958）、iOS/macOS 原生（#4917/#4891/#4896/#4890/#4909）、Nix（#4883/#4932）、Calibre 插件（#4918）、turso（#4927）、Android e2e（#4921）、koplugin（#4954）、PR #4949（被 #4989 取代）、S3 sync 系列（#4990/#4976/#4975/#4982/#4973/#4971/#4981/#4946/#4944/#4928）、watched folder（#4902，留待 v8.14）
+
+**最终可用 commit**：`11d195b`
 
 ---
 
@@ -338,6 +405,9 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 11. **`noUncheckedIndexedAccess`**（v8.9 踩过）—— `@sindresorhus/tsconfig` 启用此项，所有 `array[N]` 返回 `T | undefined`，必须加 `&& arr[N]` 守卫或用 `?.` 链。`regex.match(...)[N]` 和 `str.split(...)[N]` 都要守卫。
 12. **React 组件父传函数 prop**（v8.9 踩过）—— 父组件每次重渲染会传入新函数引用，如果该函数在子组件 useEffect deps 里，会导致无限循环。解法：子组件用 `useRef` 存最新函数，effect 只依赖真正的状态变量。
 13. **下载任务表格 schema 变更必须考虑 prisma db push**（v8.9）—— 新增字段默认值要能向后兼容现有 row（用 `@default(0)` 或 `?`）。`onDelete: Cascade` 确保删 task 自动删关联的 DownloadLog。
+14. **foliate-js 类型声明**（v8.13 踩过）—— Lite 的 Docker 构建 `git clone` foliate-js 到 packages/，上游用 git submodule。TypeScript 在 `moduleResolution:bundler` 下无法推断 `foliate-js/tts.js` 的动态 import 类型。必须新增 `src/foliate-js.d.ts` 声明 `getSentences`/`SentenceEntry`/`TTS`。TTS 类声明为 `any` 类型匹配上游 allowJs 的宽松推断（显式声明会因 strict mode 严格检查导致 `getCFI` 参数类型不匹配）。
+15. **package.json 版本号**（v8.13.1 踩过）—— `getAppVersion()` 读 `apps/readest-app/package.json` 的 `version` 字段。上游版本是 `0.11.x`，Lite 每次发版必须把 version 改成 Lite 真实版本（如 `8.13.1`），否则「关于」页面显示上游版本号。
+16. **非覆盖式上游合入**（v8.13 总结）—— 合入上游 PR 时逐 PR 研究、逐文件改，不粗暴复制。关键：判断每个文件是否 Lite 自定义（对比 v0.11.17 字节一致 = 安全合入；Lite 有改动 = 仅增量修改）。foliate-js submodule 的改动在 Docker 构建时 `git clone` 自动获取，无需手动管理 submodule pointer。
 
 ---
 
@@ -350,8 +420,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.12.0
-**最后更新**：2026-07-02
-**适用 commit**：`e85e8ce` 及之后
+**版本**：v8.13.1
+**最后更新**：2026-07-08
+**适用 commit**：`cf1b775` 及之后（v8.13.1 翻页动画 + 关于版本号修复）
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.12.0` / `8.12` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.13.1` / `8.13` / `latest`
