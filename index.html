@@ -131,16 +131,16 @@
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>多格式阅读</h3><p>原生支持 EPUB、PDF、MOBI、AZW3 等主流电子书格式，无需转换直接打开，自动适配最佳排版。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128421;</div><h3>分屏阅读</h3><p>原版 Pro 功能，现无条件开放。支持双屏对照阅读，左原文右译文，或同时参考两本书。</p></article>
-        <article class="f-card rv"><div class="f-ico b">&#127908;</div><h3>TTS 朗读</h3><p>原版 Pro 功能，现无条件开放。内置高质量语音合成，多语种多音色，可调语速音调。</p></article>
+        <article class="f-card rv"><div class="f-ico b">&#127908;</div><h3>TTS 朗读</h3><p>原版 Pro 功能，现无条件开放。内置高质量语音合成，多语种多音色，可调语速音调。<strong>v8.13：无缝 Web Audio 播放 + 关书继续播放 + mini player + 词典朗读按钮</strong>。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#9729;</div><h3>云端同步</h3><p>阅读进度、批注、书签自动同步，多端无缝切换。同步协议完全兼容原版前端逻辑。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#9997;</div><h3>无限批注与导出</h3><p>原版 Pro 功能，现无条件开放。高亮、划线、笔记一应俱全，支持导出 Markdown 或纯文本。</p></article>
         <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>实际无上限存储</h3><p>100TB 软上限（不强制），实际只受磁盘空间约束。书籍、封面存于本地挂载卷，数据完全自主。</p></article>
       </div>
 
-      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 · v8.9 · v8.10 · v8.11 · v8.12 新增</span></h3>
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 · v8.9 · v8.10 · v8.11 · v8.12 · v8.13 新增</span></h3>
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。<strong>v8.4：Per-user 加密 vault</strong>，library/settings 按 userId AES-GCM 加密，密码不存客户端，跨账号彻底隔离。<strong>v8.5：配额真正 enforce</strong>，超额上传/翻译被拒绝。普通用户独立空间，互不干扰。</p></article>
-        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.6：任务队列</strong>，有进度/状态/重试。<strong>v8.7：DownloadTask 表落库 + 用户中心面板</strong>。<strong>v8.8：分块上传</strong>，大文件不被 CF 524 超时打断。<strong>v8.9：进度条/速度/ETA/用时 + 完整日志 + 批量下载 + 自动重命名 + Cookie/Headers 高级选项</strong>。<strong>v8.10：中文汉化 + 下载记录折叠</strong>。<strong>v8.11：foliate-js 自动更新（PDF pinch-zoom/翻页性能）</strong>。<strong>v8.12：上游 v0.11.17 全量同步</strong>。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.6：任务队列</strong>，有进度/状态/重试。<strong>v8.7：DownloadTask 表落库 + 用户中心面板</strong>。<strong>v8.8：分块上传</strong>，大文件不被 CF 524 超时打断。<strong>v8.9：进度条/速度/ETA/用时 + 完整日志 + 批量下载 + 自动重命名 + Cookie/Headers 高级选项</strong>。<strong>v8.10：中文汉化 + 下载记录折叠</strong>。<strong>v8.11：foliate-js 自动更新（PDF pinch-zoom/翻页性能）</strong>。<strong>v8.12：上游 v0.11.17 全量同步</strong>。<strong>v8.13：OPDS 子目录爬取 + 自托管认证</strong>。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#127760;</div><h3>翻译词典代理</h3><p>Google 翻译、Wikipedia、Wiktionary 全部走服务器代理，客户端无需加速器。<strong>v8.0：强制登录</strong>。<strong>v8.2：可关代理</strong>。<strong>v8.5：SSRF 黑名单</strong>。</p></article>
         <article class="f-card rv"><div class="f-ico b">&#128218;</div><h3>原版词典悬浮窗</h3><p>选中文字点「Dictionary」弹悬浮窗显示 Wikipedia/Wiktionary 查询结果，点「Translate」弹翻译悬浮窗。保留原版 Readest 完整体验，代理透传。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色，零成本零依赖。</p></article>
@@ -193,7 +193,7 @@
     <div class="sec-in">
       <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">每周一个版本，永远在变好</h2><p class="sec-d">这不是一个"上线即弃"的项目。我们以周为节奏迭代，每个版本都解决真实用户反馈的问题。</p></div>
       <div class="f-grid">
-        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524、v8.9 下载进度/日志/批量/自动重命名/Cookie 高级选项、v8.10 中文汉化 + 笔记链接手机修复 + 登出安全 + 阅读统计 + 下载折叠、v8.11 合并上游 v0.11.17（Markdown + PDF 对比度 + TTS 粒度 + 最近阅读书架）、v8.12 上游 v0.11.17 全量同步（163 文件复制 + 58 Lite 自定义保留），每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每个版本都打 git tag。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524、v8.9 下载进度/日志/批量/自动重命名/Cookie 高级选项、v8.10 中文汉化 + 笔记链接手机修复 + 登出安全 + 阅读统计 + 下载折叠、v8.11 合并上游 v0.11.17（Markdown + PDF 对比度 + TTS 粒度 + 最近阅读书架）、v8.12 上游 v0.11.17 全量同步（163 文件复制 + 58 Lite 自定义保留）、v8.13 上游 v0.11.18 非覆盖式合入（Auto Scroll + 翻页动画 + TTS mini player + 词典朗读 + 主题分段控件 + 校对开关 + OPDS 爬取 + Calibre 自定义列 + 按进度排序）、v8.13.1 翻页动画补全 + 关于版本号修复，每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每个版本都打 git tag。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128736;</div><h3>社区驱动</h3><p>用户反馈的 bug 和功能建议直接进迭代队列。从 100TB 配额、字体本地化到 DeepL 切换，每项都源自真实部署场景。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128260;</div><h3>零停机升级</h3><p>SQLite 自动迁移、数据卷持久化，<code>docker compose pull &amp;&amp; up -d</code> 一条命令完成升级，旧数据无损。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>

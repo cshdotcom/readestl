@@ -48,7 +48,7 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.12.0`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.13.1`
 
 ---
 
@@ -72,7 +72,7 @@
 
 **关于页面版本号修复**：`apps/readest-app/package.json` version 从上游 `0.11.4` 改为 Lite 真实版本 `8.13.1`。`getAppVersion()` 读 `package.json.version`，AboutWindow 显示 `Version 8.13.1`
 
-**最终可用 commit**：待 CI 全绿后打 tag
+**最终可用 commit**：`d584c8e`（v8.13.1 tag 指向）
 
 ---
 
@@ -421,7 +421,7 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 ---
 
 **版本**：v8.13.1
-**最后更新**：2026-07-08
-**适用 commit**：`cf1b775` 及之后（v8.13.1 翻页动画 + 关于版本号修复）
+**最后更新**：2026-07-09
+**适用 commit**：`d584c8e` 及之后（v8.13.1 翻页动画 + 关于版本号修复 + bookService 崩溃修复）
 **CI 状态**：✅ Docker Image + CI smoke test success
 **镜像**：`ghcr.io/cshdotcom/readest-lite:8.13.1` / `8.13` / `latest`
