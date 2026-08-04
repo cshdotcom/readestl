@@ -416,6 +416,7 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 - 主页：`https://cshdotcom.github.io/readestl/`
 - 部署教程：`https://cshdotcom.github.io/readestl/deploy.html`
 - 迭代提示词：`https://cshdotcom.github.io/readestl/aph.html`
+- 交流社区：`https://nodebyte.cn`
 - 安卓源码：`https://github.com/cshdotcom/Readest-lite-Android`
 
 ---
