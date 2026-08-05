@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.13.1）
+# Readest Lite — 持续迭代助手提示词（v8.14.1）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -41,6 +41,8 @@
 29. **v8.12.2：防御性文件名生成（即使 getStorageType/book.format/book.title 异常也永不返回空串）+ 上传/下载失败响应体加 hint/received 字段方便诊断 + 放宽 download fallback parts.length 检查**
 30. **v8.13.0：上游 Readest v0.11.18 非覆盖式合入（Auto Scroll 阅读模式 + 中键自动滚动 + PDF 暗色模式页眉页脚 + 两指滚动 vs 捏合 + View Transitions API gating + TTS 大改版：无缝 Web Audio + 关书继续播放 + mini player + 词典朗读按钮 + 主题分段控件 + 校对规则开关 + OPDS 子目录爬取 + Calibre 自定义列 + 按阅读进度排序）**
 31. **v8.13.1：翻页动画（幻灯片/卷页，PR #4940 JS-only port）+ 修复「关于」页面版本号（package.json 0.11.4 → 8.13.1）+ bookService 并发导入崩溃修复（createDir 幂等，PR #4962）**
+32. **v8.14.0：上游 Readest v0.11.20 全量合入（非覆盖式，逐 PR 研究、逐文件改）· 20+ PRs 合入：OPDS 5 修复（XML 转义/MIME 标准化/Calibre 作者名/重启后目录消失/临时文件名）· reader 修复（翻页 promise 返回/垂直滑动不翻页/页边距上限/drag-shield/段落换行保留）· TTS 修复（离线词典发音/Android 锁屏继续/CarPlay 支持/mini player 位置）· 库修复（按剩余时间排序/最近阅读只显示正在读/上下文菜单定位/select-mode 不遮挡）· 注解复制深链 · 媒体会话 race 修复 · foliate-js 类型声明**
+33. **v8.14.1：RSS/Atom/JSON 订阅功能（PR #5039）— 书库点「导入」→「从订阅源 URL」即可订阅任意 RSS 源，自动生成封面、作为期刊书阅读。新增 12 个 services/rss/* 文件 + feedStore + types/rss + feeds UI 组件。library/page.tsx 加订阅处理逻辑 + FeedsView/AddFeedModal 渲染。FoliateViewer 加导航 spinner（navigate-start/end 事件）**
 
 ---
 
@@ -48,7 +50,94 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.13.1`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.14.1`
+
+---
+
+## v8.14.1 改动清单
+
+### v8.14.1 — RSS/Atom/JSON 订阅功能（PR #5039）
+
+**方法**：非覆盖式合入。逐 PR 研究 v0.11.20 的 release notes 亮点，逐文件对比 Lite 仓库，确认安全后从 v0.11.20 复制，Lite 自定义文件只做手术式修改。
+
+**新增文件（直接复制 v0.11.20）**：
+- `services/rss/articleIngest.ts` — 文章导入
+- `services/rss/feedArticleContent.ts` — 文章内容提取
+- `services/rss/feedBook.ts` — 创建 feed book + 封面 SVG 生成
+- `services/rss/feedBookUrl.ts` — feed book URL 解析
+- `services/rss/feedClient.ts` — feed 获取器
+- `services/rss/feedDiscovery.ts` — feed 发现
+- `services/rss/feedGuardedFetch.ts` — 带 SSRF 保护的 fetch
+- `services/rss/feedManifest.ts` — feed manifest 构建器
+- `services/rss/feedParser.ts` — RSS/Atom/JSON 解析器
+- `services/rss/feedPersistence.ts` — feed 持久化到磁盘
+- `services/rss/feedReader.ts` — feed book 文档打开器
+- `services/rss/makeFeedBook.ts` — feed book 工厂
+- `store/feedStore.ts` — feed store（Zustand）
+- `types/rss.ts` — RSS 类型
+- `app/library/components/feeds/AddFeedModal.tsx` — 添加 feed 对话框
+- `app/library/components/feeds/FeedsView.tsx` — feeds 管理视图
+
+**修改文件（安全，与 v0.11.18 一致）**：
+- `types/system.ts` — 加 loadFeeds/saveFeeds 到 AppService 接口
+- `utils/transform.ts` — 加 feed book transform
+- `useFoliateEvents.ts` — 加 onNavigateStart/onNavigateEnd 回调
+- `services/bookContent.ts` — 加 feed book content 分支
+
+**修改文件（Lite 自定义，手动适配）**：
+- `appService.ts` — 加 loadFeeds/saveFeeds 方法 + RssFeed import
+- `readerStore.ts` — 加 isFeedBookUrl 检查 + feed book 文档加载
+- `types/view.ts` — 加 goTo promise wrapper（navigate-start/end 事件）
+- `libs/document.ts` — 加 feedUrl 字段到 BookMetadata
+- `ImportMenu.tsx` — 加「从订阅源 URL」菜单项 + onOpenFeeds prop
+- `LibraryHeader.tsx` — 加 onOpenFeeds prop 透传
+- `library/page.tsx` — 加 showFeeds/showAddFeed 状态 + handleShowFeeds + handleAddFeedSubmit（创建 feed book、生成封面、保存到库）+ FeedsView/AddFeedModal 渲染
+- `FoliateViewer.tsx` — 加 navigating 状态 + navSpinnerTimerRef + navigateStartHandler/navigateEndHandler + 接入 useFoliateEvents + 导航时显示 spinner
+
+**i18n**：加 16 个 RSS feed key（en + zh-CN）：From Feed URL、Subscribe、Feeds、Add Feed、Enter feed URL 等
+
+**CI 教训**：v0.11.20 的 reader hooks 相互引用紧密（useTouchInterceptor → useCapturedTurn → useIframeEvents → iframeEventHandlers → ReadingRuler），必须作为整体集合复制，不能只复制部分文件。
+
+**最终可用 commit**：`c978d66`（v8.14.1 tag 指向）
+
+---
+
+## v8.14.0 改动清单
+
+### v8.14.0 — 上游 Readest v0.11.20 全量合入
+
+**方法**：非覆盖式合入。克隆上游 v0.11.20 源码，逐条研究 release notes 亮点，逐文件对比 Lite 仓库，确认安全后从 v0.11.20 复制，Lite 自定义文件只做手术式修改。
+
+**第一批 直接复制 PRs（20+ PRs）**：
+- OPDS 修复（5 PRs）：XML 转义/MIME 标准化/Calibre 作者名/重启后目录消失/临时文件名
+- reader 修复（10+ PRs）：翻页 promise 返回/垂直滑动不翻页/页边距上限/drag-shield/段落换行保留/null guard/useDrag/FoliateViewer null guard
+- TTS 修复：离线词典发音/Android 锁屏继续/CarPlay 支持/mini player 位置/0.8x 0.85x 速度预设
+- 库修复：按剩余时间排序/最近阅读只显示正在读/上下文菜单定位/select-mode 不遮挡
+- 注解：复制高亮/笔记附带深链
+- 其他：词典图标/media-session race 修复/page_stat migration 幂等/screen wake lock 仅阅读时
+
+**手动适配**：
+- `library/page.tsx` — 3 处单行修改（skip finished books/transfer queue selector/screen wake lock scope）
+- `pages/api/sync.ts` — stats cursor 性能优化（Prisma 适配）
+- `showTimeRemaining` prop 可选化（BookshelfItem/RecentShelf/ReadingProgress/BookItem）
+- `types/settings.ts` — 加 TimeRemaining 枚举
+- `statisticsDb.ts` — 加 getMedianPageDurationSecs 方法
+- `useMedianPageDurationSecs.ts` — 新 hook
+- `foliate-js.d.ts` — 已有（v8.13 创建）
+
+**排除的 PRs**：Sentry（#5012/#5014/#5027/#5030）、iOS CarPlay 原生（#5085）、OneDrive sync（#5048）、S3 config sync（#5051）、multi-provider sync（#5122）、Google Drive atomic（#5150）、passphrase recovery（#5115）、koplugin（#5106/#5186）、RSS（#5039 → v8.14.1 单独合入）
+
+**CI 修复迭代**：7 次失败后通过
+1. 缺 toggle.tsx → 复制
+2. 缺 carPlaySession.ts → 复制
+3. showTimeRemaining 必填 → 可选化
+4. 缺 useMedianPageDurationSecs → 复制
+5. 缺 isCurrentlyReadingBook → 添加到 book.ts
+6. useTouchInterceptor 缺 setLayeredTurnGestureActive → 复制整个 reader hooks 集合
+7. addLongPressListeners 不存在 → 替换为 handleTouchCancel
+8. MediaSessionState 缺 bookHash → 添加
+
+**最终可用 commit**：`87448ad`（v8.14.0 tag 指向）
 
 ---
 
@@ -421,8 +510,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.13.1
-**最后更新**：2026-07-09
-**适用 commit**：`d584c8e` 及之后（v8.13.1 翻页动画 + 关于版本号修复 + bookService 崩溃修复）
+**版本**：v8.14.1
+**最后更新**：2026-07-21
+**适用 commit**：`c978d66` 及之后（v8.14.1 RSS 订阅 + v8.14.0 上游 v0.11.20 全量合入）
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.13.1` / `8.13` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.14.1` / `8.14` / `latest`
