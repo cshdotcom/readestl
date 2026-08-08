@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.14.1）
+# Readest Lite — 持续迭代助手提示词（v8.14.2）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -43,6 +43,7 @@
 31. **v8.13.1：翻页动画（幻灯片/卷页，PR #4940 JS-only port）+ 修复「关于」页面版本号（package.json 0.11.4 → 8.13.1）+ bookService 并发导入崩溃修复（createDir 幂等，PR #4962）**
 32. **v8.14.0：上游 Readest v0.11.20 全量合入（非覆盖式，逐 PR 研究、逐文件改）· 20+ PRs 合入：OPDS 5 修复（XML 转义/MIME 标准化/Calibre 作者名/重启后目录消失/临时文件名）· reader 修复（翻页 promise 返回/垂直滑动不翻页/页边距上限/drag-shield/段落换行保留）· TTS 修复（离线词典发音/Android 锁屏继续/CarPlay 支持/mini player 位置）· 库修复（按剩余时间排序/最近阅读只显示正在读/上下文菜单定位/select-mode 不遮挡）· 注解复制深链 · 媒体会话 race 修复 · foliate-js 类型声明**
 33. **v8.14.1：RSS/Atom/JSON 订阅功能（PR #5039）— 书库点「导入」→「从订阅源 URL」即可订阅任意 RSS 源，自动生成封面、作为期刊书阅读。新增 12 个 services/rss/* 文件 + feedStore + types/rss + feeds UI 组件。library/page.tsx 加订阅处理逻辑 + FeedsView/AddFeedModal 渲染。FoliateViewer 加导航 spinner（navigate-start/end 事件）**
+34. **v8.14.2：修复分块上传合并失败（Issue #5）— `mergePartsForKey` 中 `await import('stream')` 的 `Readable` 在 Next.js standalone 打包后为 undefined，因为 stream 模块的 `module.exports` 是函数而非 object，webpack 的 namespace 复制循环跳过函数类型。修复：改用同步 `require('stream')` 替代动态 import**
 
 ---
 
@@ -50,7 +51,29 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.14.1`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.14.2`
+
+---
+
+## v8.14.2 改动清单
+
+### v8.14.2 — 修复分块上传合并失败（Issue #5）
+
+**报告者**：SuPerCxyz（Issue #5）
+
+**Bug**：大于 5MB 的文件上传后，所有 parts 传完，发起 merge 请求返回 500：
+```
+TypeError: Cannot read properties of undefined (reading 'from')
+    at mergePartsForKey
+```
+
+**根因**：`mergePartsForKey` 中 `const { Readable } = await import('stream')` 在 Next.js standalone 打包后被 webpack 转成 namespace。但 stream 模块的 `module.exports` 是函数（Stream 构造函数），不是 object，导致 webpack 的 namespace 复制循环（条件 `typeof g === 'object'`）一次都不执行，namespace 里只有 `{ default: stream }`，`Readable` 解构为 `undefined`。`stream/promises` 不受影响（它的 `module.exports` 是 object）。
+
+**修复**：`const { Readable } = await import('stream')` → `const { Readable } = require('stream')`。同步 require 不受 webpack namespace 转换影响。
+
+**影响面**：v8.8 引入分块上传时带入。小文件（≤5MB）走整文件路径不受影响，只有大文件上传受影响。
+
+**最终可用 commit**：`06b495a`（v8.14.2 tag 指向）
 
 ---
 
@@ -510,8 +533,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.14.1
-**最后更新**：2026-07-21
-**适用 commit**：`c978d66` 及之后（v8.14.1 RSS 订阅 + v8.14.0 上游 v0.11.20 全量合入）
+**版本**：v8.14.2
+**最后更新**：2026-08-08
+**适用 commit**：`06b495a` 及之后（v8.14.2 修复分块上传合并失败）
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.14.1` / `8.14` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.14.2` / `8.14` / `latest`
