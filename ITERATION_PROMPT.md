@@ -1,4 +1,4 @@
-# Readest Lite — 持续迭代助手提示词（v8.14.2）
+# Readest Lite — 持续迭代助手提示词（v8.15.0）
 
 > 把这段提示词完整粘贴给后续的 AI 助手。
 
@@ -29,21 +29,13 @@
 17. **v8.6：合并上游 0.11.12 + 图片保存 + 分享永久/自定义有效期 + 下载任务队列**
 18. **v8.7：跨设备下载任务队列（DownloadTask 表 · 暂停/恢复/重试 · 5s 轮询 · 异步后台下载）**
 19. **v8.8：分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）**
-20. **v8.9：下载任务增强（进度条/速度/ETA/用时 · 点击看完整日志 · 批量下载 · 自动重命名（base64/中文/Content-Disposition）· 高级选项（Cookie + Custom Headers））**
-21. **v8.10：中文汉化 + 笔记链接手机默认走 web reader + 登出清空残留 library.json + 阅读统计（总/今日/本周 + 书榜） + 下载记录折叠**
-22. **v8.10.1：批量下载 per-URL Cookie/Headers 语法（URL | cookie:VALUE | header:Key: VALUE）**
-23. **v8.10.2：笔记导出链接绝对 URL 修复（站外可点击）+ Reader 书不在库里时自动重试加载 + 用户管理折叠**
-24. **v8.10.3：登出后隐藏全部书籍（修复 demo books 残留）+ 移出分组不再踢出用户（修复 group-empty auto-navigate）**
-25. **v8.10.4：恢复跨设备视图设置同步（可选）— 用户中心 → Manage Sync → View Settings toggle**
-26. **v8.11.0：合并上游 v0.11.17（Markdown 渲染 + PDF 对比度 + TTS 粒度 + 最近阅读书架 + foliate-js 自动更新）**
-27. **v8.12.0：逐文件对比同步上游 v0.11.17（163 文件复制 + 21 新文件 + 58 Lite 自定义保留 + Google Drive/payment 排除）**
-28. **v8.12.1：紧急修复 v8.12.0 误覆盖 Lite 自定义（getRemoteBookFilename 在 'local' 返回空串 → 下载报 File not found + AboutWindow 被覆盖成上游版本 → 关于弹官方页面）**
-29. **v8.12.2：防御性文件名生成（即使 getStorageType/book.format/book.title 异常也永不返回空串）+ 上传/下载失败响应体加 hint/received 字段方便诊断 + 放宽 download fallback parts.length 检查**
-30. **v8.13.0：上游 Readest v0.11.18 非覆盖式合入（Auto Scroll 阅读模式 + 中键自动滚动 + PDF 暗色模式页眉页脚 + 两指滚动 vs 捏合 + View Transitions API gating + TTS 大改版：无缝 Web Audio + 关书继续播放 + mini player + 词典朗读按钮 + 主题分段控件 + 校对规则开关 + OPDS 子目录爬取 + Calibre 自定义列 + 按阅读进度排序）**
-31. **v8.13.1：翻页动画（幻灯片/卷页，PR #4940 JS-only port）+ 修复「关于」页面版本号（package.json 0.11.4 → 8.13.1）+ bookService 并发导入崩溃修复（createDir 幂等，PR #4962）**
-32. **v8.14.0：上游 Readest v0.11.20 全量合入（非覆盖式，逐 PR 研究、逐文件改）· 20+ PRs 合入：OPDS 5 修复（XML 转义/MIME 标准化/Calibre 作者名/重启后目录消失/临时文件名）· reader 修复（翻页 promise 返回/垂直滑动不翻页/页边距上限/drag-shield/段落换行保留）· TTS 修复（离线词典发音/Android 锁屏继续/CarPlay 支持/mini player 位置）· 库修复（按剩余时间排序/最近阅读只显示正在读/上下文菜单定位/select-mode 不遮挡）· 注解复制深链 · 媒体会话 race 修复 · foliate-js 类型声明**
-33. **v8.14.1：RSS/Atom/JSON 订阅功能（PR #5039）— 书库点「导入」→「从订阅源 URL」即可订阅任意 RSS 源，自动生成封面、作为期刊书阅读。新增 12 个 services/rss/* 文件 + feedStore + types/rss + feeds UI 组件。library/page.tsx 加订阅处理逻辑 + FeedsView/AddFeedModal 渲染。FoliateViewer 加导航 spinner（navigate-start/end 事件）**
-34. **v8.14.2：修复分块上传合并失败（Issue #5）— `mergePartsForKey` 中 `await import('stream')` 的 `Readable` 在 Next.js standalone 打包后为 undefined，因为 stream 模块的 `module.exports` 是函数而非 object，webpack 的 namespace 复制循环跳过函数类型。修复：改用同步 `require('stream')` 替代动态 import**
+20. **v8.9：上游 v0.11.17 合并（163 文件复制 + 21 新文件）· 防御性文件名生成 · 上传/下载错误信息加 hint/received 字段**
+21. **v8.10：中文汉化 · 阅读统计（总/今日/本周 + 书榜）· 批量下载 Cookie/Headers · 用户管理折叠 · 登出隐藏书籍**
+22. **v8.11：合并上游 v0.11.17（Markdown 渲染 · PDF/CBZ 对比度 · TTS 高亮粒度 · 最近阅读书架 · foliate-js 自动更新）**
+23. **v8.12：上游 v0.11.17 全量同步（163 文件 + 21 新文件 + 58 Lite 自定义保留）· 紧急修复误覆盖 · 防御性文件名**
+24. **v8.13：上游 Readest v0.11.18 非覆盖式合入（Auto Scroll · 翻页动画 · PDF 暗色页眉 · View Transitions API · TTS 大改版 · 主题分段控件 · OPDS 子目录 · Calibre 自定义列）**
+25. **v8.14：上游 Readest v0.11.18 → v0.11.20 非覆盖式合入（RSS/Atom/JSON feed 订阅 · reader 钩子同步 · carPlaySession · toggle primitive）· Issue #5 分块上传 merge 修复（stream require vs await import）**
+26. **v8.15：上游 Readest v0.12.1 非覆盖式合入（175 commits · ~100+ 文件）：TTS Media Overlays · 离线音频下载 · Ambient Mode · 主题 color/→theme/ 改名 · 注解 JSON 导出 + Copy Link + 数学渲染 · 翻译 Yandex/Azure 恢复 · Markdown frontmatter + 脚注 · Command Palette · PDF 内存泄漏修复**
 
 ---
 
@@ -51,351 +43,108 @@
 
 **每一个新版本必须打 git tag。**
 - 推送时 `git push && git push --tags`
-- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.14.2`
+- 用户拉取：`docker pull ghcr.io/cshdotcom/readest-lite:8.15.0`
 
 ---
 
-## v8.14.2 改动清单
+## v8.15 改动清单
+
+### v8.15.0 — 上游 Readest v0.12.1 非覆盖式合入（175 commits · ~100+ 文件）
+
+**合入策略**：克隆上游 v0.12.1 tag → 逐 PR 研究后只复制 Lite 未自定义的文件；Lite 自定义文件（Providers.tsx、PHContext.tsx、auth pages、library/page.tsx、appService/cloudService/libraryService/settingsService 等）只做外科手术式补丁。
+
+#### 主要功能模块
+
+- **TTS Media Overlays**（PR #5480）：EPUB 3 SMIL 录制朗读支持，章节级 `mediaOverlay` 字段（`SectionItem.mediaOverlay`），`ttsUseNarration` ViewConfig 开关，`MediaOverlaySection` 解析器，`NativeNarrationPlayer` 播放器
+- **离线音频下载**：`providers/bookCacheStore`、`cache/edge/opfsPackFs`、`ttsPackSync`（跨设备 TTS pack 同步）、`useTTSDownloads`、`DownloadBadge`、`TTSChaptersView`、`NativeAudioPlayer`、`BufferedTTSClient`、`TTSAudioPlayer`、7 个 TTS provider 文件（Azure/OpenAI/Edge/系统/Edgetx/Polly/Wikipedia）
+- **Ambient Mode**（PR #5394）：硬件光感器驱动的环境模式，`hasAmbientLightSensor` 字段加入 `AppService` 接口，`'ambient'` 加入 `ThemeMode`/`ThemeType`
+- **SpeedRuler**（PR #5303）：替换 SpeedChips，`ttsPlayerStyle` ViewConfig 字段
+- **主题目录改名**：`settings/color/` → `settings/theme/`，影响 `SettingsDialog.tsx`、`Providers.tsx`、`TTSPanel.tsx` 的导入路径。新增 `ThemeEditor`、`ColorInput`（基于 `react-colorful`，替换 `react-color`）、`BackgroundTextureSelector`、`HighlightColorsEditor`、`LibrarySettings`、`ReadingRulerSettings`、`TTSHighlightStyleEditor`、`ThemeColorSelector`、`ThemeModeSelector`、`CodeHighlightingSettings`、`SubPageHeader`、`WordLensPanel`。`primitives/` 目录（`BoxedList`、`NavigationRow`、`SectionTitle`、`SettingLabel`、`SettingsInput`、`SettingsRow`、`SettingsSelect`、`SettingsSwitchRow`、`Tips`、`index.ts`）
+- **阅读器新增**：自动隐藏光标（PR #5483）· 下拉书签（PR #5395）· 页面跳转（PR #5469）· 图片查看器（PR #5340）· Footer bar 组件（PR #5400）· Reading Ruler（PR #5436）· Code highlighting 设置（PR #5447）
+- **图书馆新增**：OPDS metadata 改进（PR #5471 `getContributorNames`）· Library then-sort（PR #5474 `libraryThenSortBy` + `libraryThenSortAscending`）· `LibraryGroupByType` 扩展（Tag + Subject 分组维度）· 小说导入 + 批量下载 + 页数显示 + RSS 同步
+- **注解大改版**：JSON 导出/导入（PR #5440 `NoteExportFormat` 类型 + `exportFormat` 字段，默认 `'markdown'`）· 导出包含封面（PR #5435 `includeCoverImage`）· Copy Link 工具（PR #5464 `'copylink'` 加入 `AnnotationToolType`，`annotationToolbar.ts` 支持 `supportsProofread` + `copylink`）· 注解 hub（`useTextSelector` + `useInstantAnnotation` + `Annotator` 从 v0.12.1 复刻，移除 Lite 不适用的 BookOrbit 导入）· 数学渲染（`marked-katex-extension` 依赖）· `Popup.tsx` + `AnnotationPopup.tsx`（`triangleClassName` prop）
+- **翻译大改版**：Yandex/Azure provider 恢复（PR #5455，7 个翻译 provider 文件）· 内联格式保留（PR #5479）· `TranslatorPopup` + `ProofreadPopup` 从 v0.12.1 复刻
+- **Markdown 大改版**：YAML frontmatter（PR #5420 `mdFrontmatter.ts`）· 脚注（PR #5421 `mdFootnotes.ts` + `marked-footnote` 依赖）
+- **命令面板**：PR #5409 `commandRegistry` + `CommandPaletteProvider` 复刻（含 `toggleAutoUpload`，Lite 中为 no-op）· `keybinding.ts`（`isPencilNativeKey` 等）· `deviceStore.ts`（`lastScreenBrightness` 字段）
+- **其他**：PR #5387 PDF 内存泄漏修复（`BookDoc.destroy?()` 显式释放）· PR #4959 Cloud sync paused gate（`CloudSyncGate` 接口改为 `{ readest, backends, paused }` 形状）· `metadata_updated_at`（`DBBook` 表新增列）· `librarySkeuomorphicCovers`（`SystemSettings` 新增字段）· `scrolledDirection`（`ViewConfig` 新增字段）
+
+#### Lite 适配
+
+- **cloudSyncProvider stub 更新**：`CloudSyncGate` 改为 v0.12.1 形状（`readest`/`backends`/`paused`），Lite 仍返回空/false
+- **ConversionError**：新增 `'login_wall'` code（URL 是登录墙时）
+- **subject 类型扩展**：`string | string[] | Contributor | Contributor[]`
+- **AppService 接口扩展**：`hasAmbientLightSensor` + `databaseExists` + `deleteDatabase` 默认实现（fs.exists / removeFile）
+- **ReaderStore 接口补全**：`getViews` / `setIsLoading` / `setIsSyncing` / `getGridInsets` / `setGridInsets` / `setViewInited` / `setPreviewMode` / `recreateViewer` 共 8 个方法补全（接口已声明但 create 中漏实现）
+- **showTimeRemaining / select-mode props**：在 BookshelfItem/RecentShelf/ReadingProgress 中设为 optional
+- **`layout.ts` 扩展**：`SYNC_BOOK_TTS_DIR` + `buildBookTTSDirPath` + `buildBookTTSFilePath` 加入 `services/sync/file/layout.ts`
+- **`BookDoc` 接口扩展**：`resolveCFI?`（EPUB 真实 CFI 解析）、`destroy?`（PDF #5387 内存泄漏修复）、`loadText?`/`loadBlob?`（容器访问）、`media?`（narrator/duration 元数据）
+- **`DEFAULT_NOTE_EXPORT_CONFIG`**：加 `exportFormat: 'markdown'`（NoteExportConfig.exportFormat 设为 required 后必须补默认值）
+- **`WordLensPanel.tsx`**：import path 修正（`'../../primitives'` → `'../primitives'`，file 在 `settings/theme/` 下，primitives 在 `settings/primitives/`）
+
+### v8.15.0 CI 修复迭代（9 轮）
+
+v0.12.1 范围极大（175 commits, ~100+ files）。CI 经历 9 轮修复才全绿，每轮都是「missing module / missing interface member / missing default constant」循环：
+
+1. `d16869d` — `layout.ts` 缺 `buildBookTTSDirPath`/`buildBookTTSFilePath` + `WordLensPanel.tsx` import 路径错
+2. `07b7872` — `BookDoc` 缺 `resolveCFI`/`destroy`/`loadText`/`loadBlob`/`media`
+3. `056c2f5` — `BaseAppService` 缺 `hasAmbientLightSensor`/`databaseExists`/`deleteDatabase`
+4. `61fbccd` — `DEFAULT_NOTE_EXPORT_CONFIG` 缺 `exportFormat`（`NoteExportConfig.exportFormat` 被设为 required）
+5. `f0fd2d2` — `ConversionError` code union 缺 `'login_wall'`
+6. `459e2cb` — `CloudSyncGate` stub 形状过时（旧字段 `canSyncLibrary/canSyncFiles/canSyncTTSPacks/activeProvider` → 新字段 `readest/backends/paused`）
+7. `45b3b2e` — `SectionItem` 缺 `mediaOverlay` 字段
+8. `770670c` — `ReaderStore` 接口缺 8 个方法实现（`getViews`/`setIsLoading`/`setIsSyncing`/`getGridInsets`/`setGridInsets`/`setViewInited`/`setPreviewMode`/`recreateViewer`）+ `BookMetadata.subject` 类型收窄
+9. `74305a0` — `DBBook` 缺 `metadata_updated_at` 列
+
+**最终可用 commit**：`74305a0`（v8.15.0 tag 指向）
+
+### CI 教训（追加）
+
+11. **大型上游合并必须 diff 类型定义文件**：v0.12.1 改了大量 interface（BookDoc、SectionItem、AppService、ReaderStore、NoteExportConfig、CloudSyncGate、DBBook、BookMetadata），Lite 必须逐个对照并补全。在 push 之前应该 `diff upstream/document.ts lite/document.ts`、`diff upstream/types/system.ts lite/types/system.ts` 等等。
+12. **接口扩展时同时检查实现**：ReaderStore 在接口里声明了 8 个新方法，但 create 里漏实现，TS 报「missing properties from type」错误。每次扩展 interface 都要 grep 实现位置。
+13. **目录改名时检查导入路径**：`color/` → `theme/` 改名后，`WordLensPanel.tsx` 的 `'../../primitives'` 变成 `'../primitives'`（因为目录层级变了）。所有跨目录的 relative import 都要重新验证。
+
+---
+
+## v8.14 改动清单
+
+### v8.14.0 — 上游 Readest v0.11.18 → v0.11.20 非覆盖式合入（batch 1）
+
+本次合入采用**非覆盖式**：先克隆上游 v0.11.20 源码，逐 PR 研究后只复制 Lite 未自定义的文件；Lite 自定义文件（Providers.tsx、PHContext.tsx、auth pages、library/page.tsx、appService/cloudService/libraryService/settingsService 等）只做外科手术式补丁。
+
+主要 PR：
+- PR #5201 `isCurrentlyReadingBook` 工具
+- PR #5190 `useMedianPageDurationSecs` hook
+- PR #5175 `MediaSessionState` 扩展
+- PR #5163 `FoliateViewer` touchCancel
+- PR #5150 `showTimeRemaining` optional
+- PR #5144 `toggle` primitive + `carPlaySession`
+- PR #5039 RSS/Atom/JSON feed 订阅（v8.14.1 完成落地）
+
+### v8.14.1 — RSS/Atom/JSON 订阅 + 上游 v0.11.20 reader 钩子同步
+
+- PR #5039 RSS/Atom/JSON feed 订阅落地（LibraryHeader.onOpenFeeds）
+- FoliateViewer 中 `addLongPressListeners` 替换为 `handleTouchCancel`
+- MediaSessionState 增加 `bookHash`/`bookTitle`/`bookAuthor` 字段
+- `utils/book.ts` 增加 `isCurrentlyReadingBook`
+- 新增 `useMedianPageDurationSecs` hook + `getMedianPageDurationSecs` 方法
+- `showTimeRemaining` 在 ReadingProgressProps/RecentShelfProps/BookItemProps 中设为 optional
+- 复制 library 组件 + `toggle` primitive + `carPlaySession` module
 
 ### v8.14.2 — 修复分块上传合并失败（Issue #5）
 
-**报告者**：SuPerCxyz（Issue #5）
+**报告者**：@SuPerCxyz（Issue #5）
 
-**Bug**：大于 5MB 的文件上传后，所有 parts 传完，发起 merge 请求返回 500：
-```
-TypeError: Cannot read properties of undefined (reading 'from')
-    at mergePartsForKey
-```
+**现象**：大于 5MB 的文件上传后，所有 parts 传完，发起 merge 请求返回 500：`TypeError: Cannot read properties of undefined (reading 'from') at mergePartsForKey`
 
-**根因**：`mergePartsForKey` 中 `const { Readable } = await import('stream')` 在 Next.js standalone 打包后被 webpack 转成 namespace。但 stream 模块的 `module.exports` 是函数（Stream 构造函数），不是 object，导致 webpack 的 namespace 复制循环（条件 `typeof g === 'object'`）一次都不执行，namespace 里只有 `{ default: stream }`，`Readable` 解构为 `undefined`。`stream/promises` 不受影响（它的 `module.exports` 是 object）。
+**根因**：`mergePartsForKey` 中 `await import('stream')` 在 Next.js standalone 打包后被 webpack 转成 namespace 对象。但 Node 的 `stream` 模块 `module.exports` 是**函数**（Stream 构造函数），不是 object，导致 webpack 的 namespace 复制循环一次都不执行，namespace 里只有 `{ default: stream }`，`Readable` 解构为 `undefined`，随后 `Readable.from(...)` 抛错。
 
-**修复**：`const { Readable } = await import('stream')` → `const { Readable } = require('stream')`。同步 require 不受 webpack namespace 转换影响。
+**修复**：将 `const { Readable } = await import('stream')` 改为 `const { Readable } = require('stream')`。同步 require 不受 webpack 的 namespace 转换影响。
 
-**影响面**：v8.8 引入分块上传时带入。小文件（≤5MB）走整文件路径不受影响，只有大文件上传受影响。
+**影响面**：v8.8 引入分块上传时带入此 bug。小文件（≤5MB）走整文件路径不受影响。
 
-**最终可用 commit**：`06b495a`（v8.14.2 tag 指向）
+**CI 教训 #10**：Next.js standalone 打包对 Node 内置模块有 namespace 转换行为，优先用同步 `require()` 而非 `await import()`。
 
 ---
-
-## v8.14.1 改动清单
-
-### v8.14.1 — RSS/Atom/JSON 订阅功能（PR #5039）
-
-**方法**：非覆盖式合入。逐 PR 研究 v0.11.20 的 release notes 亮点，逐文件对比 Lite 仓库，确认安全后从 v0.11.20 复制，Lite 自定义文件只做手术式修改。
-
-**新增文件（直接复制 v0.11.20）**：
-- `services/rss/articleIngest.ts` — 文章导入
-- `services/rss/feedArticleContent.ts` — 文章内容提取
-- `services/rss/feedBook.ts` — 创建 feed book + 封面 SVG 生成
-- `services/rss/feedBookUrl.ts` — feed book URL 解析
-- `services/rss/feedClient.ts` — feed 获取器
-- `services/rss/feedDiscovery.ts` — feed 发现
-- `services/rss/feedGuardedFetch.ts` — 带 SSRF 保护的 fetch
-- `services/rss/feedManifest.ts` — feed manifest 构建器
-- `services/rss/feedParser.ts` — RSS/Atom/JSON 解析器
-- `services/rss/feedPersistence.ts` — feed 持久化到磁盘
-- `services/rss/feedReader.ts` — feed book 文档打开器
-- `services/rss/makeFeedBook.ts` — feed book 工厂
-- `store/feedStore.ts` — feed store（Zustand）
-- `types/rss.ts` — RSS 类型
-- `app/library/components/feeds/AddFeedModal.tsx` — 添加 feed 对话框
-- `app/library/components/feeds/FeedsView.tsx` — feeds 管理视图
-
-**修改文件（安全，与 v0.11.18 一致）**：
-- `types/system.ts` — 加 loadFeeds/saveFeeds 到 AppService 接口
-- `utils/transform.ts` — 加 feed book transform
-- `useFoliateEvents.ts` — 加 onNavigateStart/onNavigateEnd 回调
-- `services/bookContent.ts` — 加 feed book content 分支
-
-**修改文件（Lite 自定义，手动适配）**：
-- `appService.ts` — 加 loadFeeds/saveFeeds 方法 + RssFeed import
-- `readerStore.ts` — 加 isFeedBookUrl 检查 + feed book 文档加载
-- `types/view.ts` — 加 goTo promise wrapper（navigate-start/end 事件）
-- `libs/document.ts` — 加 feedUrl 字段到 BookMetadata
-- `ImportMenu.tsx` — 加「从订阅源 URL」菜单项 + onOpenFeeds prop
-- `LibraryHeader.tsx` — 加 onOpenFeeds prop 透传
-- `library/page.tsx` — 加 showFeeds/showAddFeed 状态 + handleShowFeeds + handleAddFeedSubmit（创建 feed book、生成封面、保存到库）+ FeedsView/AddFeedModal 渲染
-- `FoliateViewer.tsx` — 加 navigating 状态 + navSpinnerTimerRef + navigateStartHandler/navigateEndHandler + 接入 useFoliateEvents + 导航时显示 spinner
-
-**i18n**：加 16 个 RSS feed key（en + zh-CN）：From Feed URL、Subscribe、Feeds、Add Feed、Enter feed URL 等
-
-**CI 教训**：v0.11.20 的 reader hooks 相互引用紧密（useTouchInterceptor → useCapturedTurn → useIframeEvents → iframeEventHandlers → ReadingRuler），必须作为整体集合复制，不能只复制部分文件。
-
-**最终可用 commit**：`c978d66`（v8.14.1 tag 指向）
-
----
-
-## v8.14.0 改动清单
-
-### v8.14.0 — 上游 Readest v0.11.20 全量合入
-
-**方法**：非覆盖式合入。克隆上游 v0.11.20 源码，逐条研究 release notes 亮点，逐文件对比 Lite 仓库，确认安全后从 v0.11.20 复制，Lite 自定义文件只做手术式修改。
-
-**第一批 直接复制 PRs（20+ PRs）**：
-- OPDS 修复（5 PRs）：XML 转义/MIME 标准化/Calibre 作者名/重启后目录消失/临时文件名
-- reader 修复（10+ PRs）：翻页 promise 返回/垂直滑动不翻页/页边距上限/drag-shield/段落换行保留/null guard/useDrag/FoliateViewer null guard
-- TTS 修复：离线词典发音/Android 锁屏继续/CarPlay 支持/mini player 位置/0.8x 0.85x 速度预设
-- 库修复：按剩余时间排序/最近阅读只显示正在读/上下文菜单定位/select-mode 不遮挡
-- 注解：复制高亮/笔记附带深链
-- 其他：词典图标/media-session race 修复/page_stat migration 幂等/screen wake lock 仅阅读时
-
-**手动适配**：
-- `library/page.tsx` — 3 处单行修改（skip finished books/transfer queue selector/screen wake lock scope）
-- `pages/api/sync.ts` — stats cursor 性能优化（Prisma 适配）
-- `showTimeRemaining` prop 可选化（BookshelfItem/RecentShelf/ReadingProgress/BookItem）
-- `types/settings.ts` — 加 TimeRemaining 枚举
-- `statisticsDb.ts` — 加 getMedianPageDurationSecs 方法
-- `useMedianPageDurationSecs.ts` — 新 hook
-- `foliate-js.d.ts` — 已有（v8.13 创建）
-
-**排除的 PRs**：Sentry（#5012/#5014/#5027/#5030）、iOS CarPlay 原生（#5085）、OneDrive sync（#5048）、S3 config sync（#5051）、multi-provider sync（#5122）、Google Drive atomic（#5150）、passphrase recovery（#5115）、koplugin（#5106/#5186）、RSS（#5039 → v8.14.1 单独合入）
-
-**CI 修复迭代**：7 次失败后通过
-1. 缺 toggle.tsx → 复制
-2. 缺 carPlaySession.ts → 复制
-3. showTimeRemaining 必填 → 可选化
-4. 缺 useMedianPageDurationSecs → 复制
-5. 缺 isCurrentlyReadingBook → 添加到 book.ts
-6. useTouchInterceptor 缺 setLayeredTurnGestureActive → 复制整个 reader hooks 集合
-7. addLongPressListeners 不存在 → 替换为 handleTouchCancel
-8. MediaSessionState 缺 bookHash → 添加
-
-**最终可用 commit**：`87448ad`（v8.14.0 tag 指向）
-
----
-
-## v8.13.1 改动清单
-
-### v8.13.1 — 翻页动画 + 关于页面版本号修复 + bookService 崩溃修复
-
-**PR #4940 翻页动画（幻灯片/卷页）— JS-only port**：
-- 新增文件：`utils/pageCurl.ts`、`utils/pageSlide.ts`、`app/reader/hooks/useCapturedTurn.ts`、`app/reader/utils/capturedTurn.ts`
-- `types/book.ts`：新增 `PageTurnStyle` 类型 + `pageTurnStyle` 字段
-- `services/constants.ts`：`DEFAULT_VIEW_CONFIG` 加 `pageTurnStyle: 'push'`
-- `utils/bridge.ts`：加 `captureWebviewRegion`（web 端 reject，回退 CSS curl）
-- `FoliateViewer.tsx`：调用 `useCapturedTurn` + `applyPageTurnAttributes`，移除 inline no-swipe 块
-- `BooksGrid.tsx`：加 `data-view-transition-root` 属性
-- `ControlPanel.tsx`：加 Animation Style SettingsSelect（Push/Slide/Page Curl，按 `supportsViewTransitionGroup` gating）
-- 跳过原生代码（swift-rs/Rust/Kotlin/Swift）— Lite 是 web-only
-
-**PR #5000 gate captured slide/curl on scrollLocked**：已包含在复制的 `useCapturedTurn.ts` 中
-
-**PR #4962 bookService 崩溃修复**：`bookService.ts` 的 `createDir` 改为幂等递归（`createDir(path, base, true)`），修复并发导入竞争
-
-**关于页面版本号修复**：`apps/readest-app/package.json` version 从上游 `0.11.4` 改为 Lite 真实版本 `8.13.1`。`getAppVersion()` 读 `package.json.version`，AboutWindow 显示 `Version 8.13.1`
-
-**最终可用 commit**：`d584c8e`（v8.13.1 tag 指向）
-
----
-
-## v8.13.0 改动清单
-
-### v8.13.0 — 上游 Readest v0.11.18 非覆盖式合入
-
-**方法**：逐 PR 研究、逐文件改、不覆盖 Lite 自定义代码。合入 19 个 PR，排除 15 个不适用 PR。
-
-**第一批 阅读器核心修复（7 PRs）**：
-- PR #4910 注解深链不同书切换（useOpenAnnotationLink + useBooksManager.openBookInReader + goToCfiWhenReady）
-- PR #4912 两指滚动 vs 捏合缩放（useIframeEvents 延迟决策 + 24px 死区）
-- PR #4911 PDF 暗色模式页眉页脚（mix-blend-difference）
-- PR #5001 页边距收缩到安全区（fixed-layout 用 text-base-content）
-- PR #4989 View Transitions API gating（新增 viewTransition.ts + supportsViewTransitionsAPI/Group）
-- PR #4955 中键自动滚动（新增 useMiddleClickAutoscroll + AutoscrollIndicator + autoscroller.ts）
-- PR #4998/#4999 Auto Scroll 阅读模式（新增 useAutoScroll + AutoScrollControl + PacedScroller + Shift+A 快捷键）
-
-**第二批 TTS 大改版（5 PRs）**：
-- PR #4931 Edge TTS 无缝 Web Audio（新增 WebAudioPlayer/pcm/timeStretch/ttsDuration/SectionTimeline）
-- PR #4941 关书继续播放（新增 TTSSessionManager + ttsMediaBridge + NowPlayingBar）
-- PR #4957 词典弹窗朗读按钮（新增 wordPronouncer）
-- PR #4994 Android TTS 媒体控制（TS 侧 only，移除 alwaysInForeground）
-- PR #4996 TTS mini player（新增 TTSMiniPlayer/TTSPlayerSheet/TTSScrubber，删除 TTSBar/TTSIcon/TTSPanel）
-
-**第三批 图书馆/UI/OPDS（7 PRs）**：
-- PR #4947 传输队列持久化（transferManager 加 clearCompleted/clearFailed/clearAll）
-- PR #4831/#4913 主题分段控件（ThemeModeSelector 重写）
-- PR #4859 校对规则开关（ProofreadRules 重写）
-- PR #4948 OPDS 子目录爬取（feedChecker + MAX_CRAWL_DEPTH）
-- PR #5002 OPDS 自托管认证（isPrivateHostAllowed + 400 重试 + skipSslVerification）
-- PR #4939 Calibre 自定义列（CalibreCustomColumn + formatCalibreColumnValue + getCalibreColumnsText）
-- PR #4427 按阅读进度排序（LibrarySortByType.Progress + getBookReadRatio）
-
-**foliate-js 类型声明**：新增 `src/foliate-js.d.ts`，声明 `getSentences`/`SentenceEntry`/`TTS`（TTS 声明为 `any` 类型匹配上游 allowJs 宽松推断）。解决 Lite Docker 构建（git clone）vs 上游（git submodule）的类型推断差异。
-
-**排除的 PR**：Sentry（#4914/#4929/#4952/#4958）、iOS/macOS 原生（#4917/#4891/#4896/#4890/#4909）、Nix（#4883/#4932）、Calibre 插件（#4918）、turso（#4927）、Android e2e（#4921）、koplugin（#4954）、PR #4949（被 #4989 取代）、S3 sync 系列（#4990/#4976/#4975/#4982/#4973/#4971/#4981/#4946/#4944/#4928）、watched folder（#4902，留待 v8.14）
-
-**最终可用 commit**：`11d195b`
-
----
-
-## v8.12.0 改动清单
-
-### v8.12.0 — 逐文件对比同步上游 v0.11.17
-
-**方法**：逐文件对比 Lite 和上游 v0.11.17，分类处理：
-- 163 个安全文件：直接从上游复制
-- 21 个新文件：从上游添加（排除 Google Drive/payment/tests）
-- 58 个 Lite 自定义文件：**绝不覆盖**，只手动添加缺失字段
-
-**Lite 自定义保留**：VaultProvider、PHContext、本地 JWT 认证、Prisma+SQLite、本地文件存储、登出清空、用户/demo 守卫、syncViewSettings、Bookshelf group-empty 修复、deeplink resolveWebBaseUrl、proxyEnabled、WebDAVSyncLogEntry、下载任务、阅读统计、用户管理、RemoteDownloadDialog、所有 pages/api/*
-
-**排除**：Google Drive、Stripe/Apple/payment、所有 __tests__
-
-**手动添加的类型字段**：webtoonMode、showStickyProgressBar、wordLensGlossFontSize/Color、SearchMode、mode、abandoned、coverHash/coverUpdatedAt、fraction、deletedAt+updatedAt(ProofreadRule)、nearbyWords、segments+emphasized+text(SearchExcerpt)、refresh(HardwarePageTurner)、biometricUnlockEnabled、WebDAVBrowseSortByType、browseSortBy/browseSortAscending、synced_at/uploaded_at/downloaded_at(BookDataRecord)
-
-**最终可用 commit**：`e85e8ce`
-
----
-
-## v8.11.0 改动清单
-
-### v8.11.0 — 合并上游 v0.11.17 功能
-
-**合并的上游 PR**：
-- #4816 Markdown (.md) 文件渲染
-- #4800 PDF/CBZ 对比度选项
-- #4807 TTS 高亮粒度（单词/句子）
-- #4829 最近阅读书架
-- #4820 自动翻页角落区域上限
-- #4804 清理空高亮
-- foliate-js 自动更新（pinch-zoom + scroll lag 修复）
-
-**未合并**：
-- #4846 双击选词 — 依赖链太深（5+ 文件 API 变更），已回滚
-
-**最终可用 commit**：`aca02d3`
-
----
-
-## v8.10.4 改动清单
-
-### v8.10.4 — 恢复跨设备视图设置同步（可选）
-
-**背景**：v8.6.0 合并上游 PR #4672 时把 view settings（字体/主题/排版）改成设备本地，只同步 CFI。用户反馈希望恢复跨设备同步。
-
-**实现**：不再硬编码设备本地，改为可选开关：
-- `settings.ts` 新增 `syncViewSettings?: boolean`（默认 false）
-- `useProgressSync.ts` 检查 `settings.syncViewSettings`，true 时合并远端 config 到本地
-- `SyncCategoriesSection.tsx` 加独立的 View Settings toggle
-
-**向后兼容**：默认 false 保持 v8.6 行为，老用户升级不变。想要跨设备同步的用户去 用户中心 → Manage Sync → View Settings 开启。
-
----
-
-## v8.10.3 改动清单
-
-### v8.10.3 — 登出隐藏全部书籍 + 移出分组不再踢出用户
-
-**1. 登出后书籍全部隐藏（修复 demo books 残留）**
-- 问题：登出后个别书还显示
-- 根因：demoBooks effect 在 libraryLoaded=true 时重新添加 demo books，登出后 libraryLoaded 被 initLibrary 重设为 true，demoBooks state 还在 → effect 触发 → demo books 加回来
-- 修复：demoBooks effect 加 !token || !user 守卫
-
-**2. 移出分组不再踢出用户（修复 group-empty auto-navigate）**
-- 问题：用户在分组里把最后一本书移出 → currentBookshelfItems.length === 0 → 立即 updateUrlParams({ group: null }) → 被踢回根书库 → 再点进去又被踢出
-- 修复：只在 getGroupName(groupId) 返回空（group 真被删了）才导航走；group 暂时为空时显示空状态提示
-
-**最终可用 commit**：`e16f7b9`
-
----
-
-## v8.10.2 改动清单
-
-### v8.10.2 — 笔记链接修复 + 用户管理折叠
-
-**1. 笔记导出链接打不开（核心 bug）**
-- 问题：`buildAnnotationWebUrl` 用构建期 `READEST_WEB_BASE_URL`（Readest Lite 里为 `''`），导出链接是相对路径 `/o/book/...`，站外点不开
-- 修复：新增 `resolveWebBaseUrl()` 运行时解析，优先用 `runtimeConfig.apiBaseUrl`（`PUBLIC_BASE_URL` 注入），回退 `window.location.origin`
-- 导出链接现在永远是绝对 URL
-
-**2. Reader 书不在库里时自动重试**
-- 问题：用户从笔记链接进入 `/reader/{hash}`，内存 library 还没加载完，`getBookByHash` 返回 undefined，报「无法打开书籍」
-- 修复：`initViewState` 失败时调 `appService.loadLibraryBooks()` 重读磁盘，找到继续，找不到才报错
-
-**3. 用户管理折叠**
-- `UserManagement.tsx` 默认只显 3 个用户，「查看全部」按钮打开 `AllUsersModal`
-
-**最终可用 commit**：`6cf4ad7`
-
----
-
-## v8.10.1 改动清单
-
-### v8.10.1 — 批量下载 per-URL Cookie/Headers 语法
-
-**问题**：v8.9 批量下载只支持一组全局 Cookie/Headers，不同网站要分多次提交。
-
-**解决**：扩展 textarea 语法：
-```
-# 注释
-https://site-a.com/book.epub | cookie:sessionid=abc123
-https://site-b.com/book.epub | cookie:PHPSESSID=def | header:Referer: https://site-b.com
-```
-
-**合并逻辑**：per-URL 指令优先，没有指令的 URL 回退到全局 Advanced Options 里的 Cookie/Headers。
-
-**向后兼容**：API 同时接受 `items: [{ url, cookies?, headers? }]` 和旧版 `urls: string[] + 全局 cookies/headers`。
-
----
-
-## v8.10 改动清单
-
-### v8.10.0 — 中文汉化 + 笔记链接手机修复 + 登出安全 + 阅读统计 + 下载折叠
-
-**1. 中文汉化（zh-CN + zh-TW）**
-- 补全 v8.7-v8.9 所有新增字符串的中文翻译（60 个 key）
-
-**2. 笔记导出链接手机修复**
-- `/o/page.tsx`：手机默认直接跳 web reader，不再尝试启动 App
-- `useOpenAnnotationLink.ts`：书不在库里时导航到书库页
-
-**3. 登出后残留书籍修复**
-- `handleLogout`：清空 `library.json` + 重置 `libraryLoaded`
-- `library/page.tsx`：加 `user/token` 守卫
-
-**4. 阅读统计功能**
-- `GET /api/stats/aggregate` 端点
-- `ReadingStatsCard.tsx`：横向滚动卡片 + 点击打开 Modal
-- `ReadingStatsModal.tsx`：Tab + 书榜排序 + 渐变进度条 + 搜索
-
-**5. 下载记录折叠**
-- `DownloadTasks.tsx` 默认只显 3 条 + 「查看全部」按钮
-- `DownloadTasksModal.tsx` 完整列表
-
-**最终可用 commit**：`fa35e84`
-
----
-
-## v8.9 改动清单
-
-### v8.9.0 — 下载任务增强
-
-**问题背景**：用户要求：下载进度条、速度、ETA、用时、完整日志（点击任务弹出）、批量下载、自动重命名（base64/中文/查询参数）、Cookie + Custom Headers 高级选项。
-
-**架构**：
-- `filenameDetect.ts` — 智能文件名识别（优先级：Content-Disposition > URL path > URL query `file=` > base64 > Content-Type > fallback）
-- `downloadRunner.ts` — 共享下载执行器（被 create/retry/batch 共用）
-  - 流式读取 `response.body.getReader()`
-  - 每秒 throttle 写库 progress/downloadedBytes/totalBytes/speedBps/etaSeconds
-  - 每 2 秒独立检查暂停状态（不被进度更新干扰）
-  - 完整日志写入 DownloadLog 表（info/warn/error）
-- 新增 API `GET /api/download-tasks/[id]/logs` 返回任务日志
-- POST `/api/download-tasks` 加 `cookies` / `headers` / `batch` 字段
-- `RemoteDownloadDialog` 重写：Tab（Single/Batch）+ Advanced Options（Cookie + Headers）
-- `DownloadTasks.tsx` 加 progress bar、速度、ETA、用时，点击行打开详情 Modal
-- 新增 `DownloadTaskDetailModal.tsx` 显示完整日志（筛选 All/INFO/WARN/ERROR + Auto-scroll）
-
-### v8.9.0 CI 修复
-
-1. `94cc02c` — `filenameDetect.ts` `noUncheckedIndexedAccess` 守卫
-   - `starMatch[1]` → 加 `starMatch && starMatch[1]` 守卫
-   - `plainMatch[1]` → 加 `plainMatch && plainMatch[1]` 守卫
-   - `split(';')[0]` → 用中间变量 + `|| ''` 兑底
-
-**最终可用 commit**：`94cc02c`（v8.9.0 tag 指向此 commit）
-
----
-
-## v8.8 改动清单
 
 ### v8.8.0 — 分块上传规避 Cloudflare 524 超时
 
@@ -514,12 +263,6 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 8. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
 9. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
 10. **上传大文件必须分块**（v8.8）—— 不要走整文件 PUT，CF 100s 超时会返 524；块大小 5MB，index=0 时服务端自动清理上次失败残留的 parts
-11. **`noUncheckedIndexedAccess`**（v8.9 踩过）—— `@sindresorhus/tsconfig` 启用此项，所有 `array[N]` 返回 `T | undefined`，必须加 `&& arr[N]` 守卫或用 `?.` 链。`regex.match(...)[N]` 和 `str.split(...)[N]` 都要守卫。
-12. **React 组件父传函数 prop**（v8.9 踩过）—— 父组件每次重渲染会传入新函数引用，如果该函数在子组件 useEffect deps 里，会导致无限循环。解法：子组件用 `useRef` 存最新函数，effect 只依赖真正的状态变量。
-13. **下载任务表格 schema 变更必须考虑 prisma db push**（v8.9）—— 新增字段默认值要能向后兼容现有 row（用 `@default(0)` 或 `?`）。`onDelete: Cascade` 确保删 task 自动删关联的 DownloadLog。
-14. **foliate-js 类型声明**（v8.13 踩过）—— Lite 的 Docker 构建 `git clone` foliate-js 到 packages/，上游用 git submodule。TypeScript 在 `moduleResolution:bundler` 下无法推断 `foliate-js/tts.js` 的动态 import 类型。必须新增 `src/foliate-js.d.ts` 声明 `getSentences`/`SentenceEntry`/`TTS`。TTS 类声明为 `any` 类型匹配上游 allowJs 的宽松推断（显式声明会因 strict mode 严格检查导致 `getCFI` 参数类型不匹配）。
-15. **package.json 版本号**（v8.13.1 踩过）—— `getAppVersion()` 读 `apps/readest-app/package.json` 的 `version` 字段。上游版本是 `0.11.x`，Lite 每次发版必须把 version 改成 Lite 真实版本（如 `8.13.1`），否则「关于」页面显示上游版本号。
-16. **非覆盖式上游合入**（v8.13 总结）—— 合入上游 PR 时逐 PR 研究、逐文件改，不粗暴复制。关键：判断每个文件是否 Lite 自定义（对比 v0.11.17 字节一致 = 安全合入；Lite 有改动 = 仅增量修改）。foliate-js submodule 的改动在 Docker 构建时 `git clone` 自动获取，无需手动管理 submodule pointer。
 
 ---
 
@@ -528,13 +271,12 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 - 主页：`https://cshdotcom.github.io/readestl/`
 - 部署教程：`https://cshdotcom.github.io/readestl/deploy.html`
 - 迭代提示词：`https://cshdotcom.github.io/readestl/aph.html`
-- 交流社区：`https://nodebyte.cn`
 - 安卓源码：`https://github.com/cshdotcom/Readest-lite-Android`
 
 ---
 
-**版本**：v8.14.2
-**最后更新**：2026-08-08
-**适用 commit**：`06b495a` 及之后（v8.14.2 修复分块上传合并失败）
+**版本**：v8.8.0
+**最后更新**：2026-06-21
+**适用 commit**：`8527223` 及之后
 **CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.14.2` / `8.14` / `latest`
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`

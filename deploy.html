@@ -84,25 +84,15 @@
     <p class="subtitle">5 分钟完成部署，从 Docker 安装到上线运行，按顺序跟做即可。</p>
 
     <div class="note tip" style="margin-bottom:1.5rem">
-      <strong>v8.14.2 最新功能：</strong>
-      修复分块上传合并失败（大文件上传 >5MB 后 merge 请求返回 500 的 bug，Issue #5）· 根因：Next.js standalone 打包后 <code>await import('stream')</code> 的 <code>Readable</code> 为 undefined，改用同步 <code>require('stream')</code> 修复。<br>
-      <strong>v8.14.1：</strong>RSS/Atom/JSON 订阅（书库点「导入」→「从订阅源 URL」，订阅任意 RSS 源作为期刊书）。<br>
-      <strong>v8.14：</strong>上游 Readest v0.11.20 全量合入（TTS 离线下载 + 句子/段落间隙 + 翻页动画 + 主题编辑器 + 按剩余时间排序 + OPDS 5 修复 + 复制保留段落换行 + 词典深链）。<br>
-      <strong>v8.13.1：</strong>翻页动画（幻灯片/卷页，设置 → 动画样式）· 修复「关于」页面版本号（package.json 0.11.4 → 8.13.1）· bookService 并发导入崩溃修复。<br>
-      <strong>v8.13：</strong>上游 v0.11.18 非覆盖式合入（Auto Scroll + 中键滚动 + PDF 暗色模式页眉页脚 + 两指滚动 vs 捏合 + View Transitions API gating + TTS 大改版 + 主题分段控件 + 校对开关 + OPDS 爬取 + Calibre 自定义列 + 按进度排序）。<br>
-      <strong>v8.12.2：</strong>防御性文件名生成 + 上传/下载错误响应体加 <code>hint</code>/<code>received</code> 字段方便诊断。<br>
-      <strong>v8.12.1：</strong>紧急修复 v8.12.0 上游同步误覆盖 Lite 自定义代码：① 下载书籍报 "File not found"；② 「关于」按钮弹出官方 Readest 页面。<br>
-      <strong>v8.12：</strong>上游 Readest v0.11.17 <strong>全量同步</strong>（163 文件复制 + 21 新文件 + 58 Lite 自定义保留）。<br>
-      <strong>v8.11：</strong>合并上游 v0.11.17 功能：Markdown (.md) 文件渲染 · PDF/CBZ 对比度选项 · TTS 高亮粒度（单词/句子）· 最近阅读书架 · 自动翻页角落区域 50px 上限 · 清理空高亮 · foliate-js 自动更新（PDF pinch-zoom/翻页性能）。<br>
-      <strong>v8.10.4：</strong>恢复跨设备视图设置同步（用户中心 → Manage Sync → View Settings toggle，默认关）。<br>
-      <strong>v8.10.3：</strong>登出后隐藏全部书籍（修复 demo books 残留）· 移出分组不再踢出用户。<br>
-      <strong>v8.10.2：</strong>笔记导出链接绝对 URL（站外可点击）· Reader 书不在库里时自动重试加载 · 用户管理折叠。<br>
-      <strong>v8.10.1：</strong>批量下载 per-URL Cookie/Headers 语法（<code>URL | cookie:VALUE | header:Key: VALUE</code>）。<br>
-      <strong>v8.10：</strong>中文汉化（zh-CN + zh-TW 补全 60 个翻译 key）· 笔记导出链接手机默认走 web reader · 登出后清空残留 library.json · 阅读统计（总/今日/本周 + 书榜）· 下载记录折叠。<br>
-      <strong>v8.9：</strong>下载任务大增强：进度条/速度/ETA/用时 · 点击任务看完整日志 · 批量下载 · 自动重命名 · Cookie/Headers 高级选项。<br>
+      <strong>v8.15 最新功能：</strong>
+      上游 Readest v0.12.1 非覆盖式合入（175 commits · ~100+ 文件）：TTS Media Overlays（EPUB 3 SMIL 录制朗读）· 离线音频下载 + 跨设备 pack 同步 · Ambient Mode（光感器驱动）· SpeedRuler · 主题目录 color/→theme/ 大改名（ThemeEditor/ColorInput/react-colorful）· 阅读器新增（自动隐藏光标/下拉书签/页面跳转/图片查看器/Reading Ruler）· 注解 JSON 导出 + Copy Link + 数学渲染（marked-katex-extension）· 翻译 Yandex/Azure 恢复 + 内联格式保留 · Markdown YAML frontmatter + 脚注（marked-footnote）· Command Palette · PDF 内存泄漏修复 · Cloud sync paused gate。<br>
+      <strong>v8.14：</strong>上游 v0.11.18→v0.11.20 合入（RSS/Atom/JSON feed 订阅 · reader 钩子同步 · carPlaySession · toggle primitive）· Issue #5 分块上传 merge 修复（stream require vs await import）。<br>
+      <strong>v8.13：</strong>上游 v0.11.18 合入：Auto Scroll + 翻页动画 + PDF 暗色页眉 + View Transitions API + TTS 大改版 + 主题分段控件 + OPDS 子目录 + Calibre 自定义列。<br>
+      <strong>v8.11-v8.12：</strong>上游 v0.11.17 合入：Markdown 渲染 + PDF/CBZ 对比度 + TTS 高亮粒度 + 最近阅读书架 + foliate-js 自动更新。<br>
+      <strong>v8.9-v8.10：</strong>中文汉化 · 阅读统计（总/今日/本周 + 书榜）· 批量下载 Cookie/Headers · 用户管理折叠 · 登出隐藏书籍。<br>
       <strong>v8.8：</strong>分块上传规避 Cloudflare 524 超时（大文件自动切 5MB · 服务端流式合并 · 小文件零变化）。<br>
       <strong>v8.7：</strong>跨设备下载任务队列（DownloadTask 表落库 · 用户中心面板 · 5s 轮询 · 暂停/恢复/重试 · 批量操作）。<br>
-      <strong>v8.6：</strong>合并上游 Readest 0.11.12 · 图片保存按钮 · 分享永久(∞)+自定义有效期 · 远程下载任务队列 · <a href="https://github.com/cshdotcom/Readest-lite-Android" target="_blank">安卓自编译源码</a>。<br>
+      <strong>v8.6：</strong>合并上游 Readest 0.11.12 + 图片保存按钮 + 分享永久(∞)+自定义有效期 + 远程下载任务队列 + <a href="https://github.com/cshdotcom/Readest-lite-Android" target="_blank">安卓自编译源码</a>。<br>
       <strong>v8.5：</strong>配额真正 enforce · 真实配额 UI · SSRF 黑名单 · fire-and-forget 下载。<br>
       <strong>v8.4：</strong>Per-user 加密 vault（AES-GCM + 服务端托管密钥）。<br>
       <strong>v8.3：</strong>账号切换数据隔离。<br>
@@ -170,7 +160,7 @@ docker --version</pre>
         <li><code>PORT</code>（可选，默认 8225）：容器内监听端口，一般不需修改</li>
         <li><code>DEEPL_ENABLED=true</code>（可选）：启用 DeepL 翻译，需配合 <code>DEEPL_FREE_API_KEYS</code> 或 <code>DEEPL_PRO_API_KEYS</code></li>
       </ul>
-      <div class="note tip">指定特定版本：<code>ghcr.io/cshdotcom/readest-lite:v8.14.2</code>（每个版本都有对应 git tag，详见 GitHub Releases）。</div>
+      <div class="note tip">指定特定版本：<code>ghcr.io/cshdotcom/readest-lite:8.15.0</code>（每个版本都有对应 git tag，详见 GitHub Releases）。</div>
     </section>
 
     <section class="sec" id="compose">
@@ -401,10 +391,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
   <footer class="footer">
     <span>&copy; 2024-2026 Readest Lite</span>
-    <div style="display:flex;gap:1.2rem">
-      <a href="/readestl/">&larr; 返回首页</a>
-      <a href="https://nodebyte.cn" target="_blank" rel="noopener noreferrer">交流社区</a>
-    </div>
+    <a href="/readestl/">&larr; 返回首页</a>
   </footer>
 
   <script>
