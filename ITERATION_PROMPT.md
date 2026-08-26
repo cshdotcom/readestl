@@ -236,6 +236,89 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
+## 🛡 Lite 自定义文件完整清单（绝对不能被上游覆盖）
+
+> **这是最重要的防毁清单。** 上游合并时，以下文件**只做外科手术式补丁**（手动加字段、加方法），**绝不能整个文件覆盖**。覆盖即毁项目（SQLite→Supabase、本地FS→R2、JWT→GoTrue、删付费→恢复付费墙）。
+
+### 1. 基础设施（仓库根）
+- `Dockerfile` — 单容器构建（端口 8225，数据卷 /data）
+- `docker-compose.yml`
+- `prisma/schema.prisma` — SQLite schema（User/Book/BookConfig/BookNote/DownloadTask/ShareBook/SendInbox 等表）
+- `apps/readest-app/package.json` — **version 字段必须同步 Lite 版本号**（如 `8.15.0`），不是上游的 `0.x.x`
+- `apps/readest-app/src/foliate-js.d.ts` — Docker build 用 `git clone --depth 1` 拉 foliate-js（上游用 git submodule），需要显式类型声明，TTS class 声明为 `any`
+
+### 2. API 路由（全部 Lite 自定义 — Prisma 不用 Supabase）
+**`pages/api/`**：sync.ts, deepl/translate.ts, user/delete.ts, kosync.ts, sync/replica-keys.ts, sync/replicas.ts, storage/* (stats, _put, download, _get, delete, list, upload, purge), send/* (senders, inbox, fetch-url, inbox/claim, inbox/[id]/payload, inbox/[id]/transition, inbox/file, address), usage/index.ts
+
+**`app/api/`**：proxy/* (wiki, resource), download-tasks/* (batch, route, [id]), share/* ([token]/* , list, create), books/download-url, auth/v1/* (vault-key, user, logout, token, signup, settings), tts/edge, ai/* (chat, embed), translate/google, admin/users/* , opds/proxy, metadata/search, hardcover/graphql
+
+### 3. Pages（Lite 自定义入口）
+- `app/auth/page.tsx` + `app/auth/*/page.tsx`（update/error/callback/recovery）— 本地 JWT 登录，不是 Supabase GoTrue
+- `app/library/page.tsx` — Lite 书库页
+- `app/user/page.tsx` — 用户中心
+- `app/o/page.tsx` — Lite 组织页
+- `app/page.tsx`, `app/reader/page.tsx`, `app/send/page.tsx`, `app/opds/page.tsx`, `app/offline/page.tsx`, `app/updater/page.tsx`, `app/s/page.tsx`
+- `pages/_app.tsx`, `pages/_document.tsx`, `pages/reader/[ids].tsx`
+
+### 4. Context（Lite 自定义）
+- `context/AuthContext.tsx` — 本地 JWT 多用户系统
+- `context/PHContext.tsx` — PostHog 配置
+- `context/VaultContext.tsx` — Per-user 加密 vault（必须在 AuthProvider 内）
+- `context/EnvContext.tsx`, `context/SyncContext.tsx`, `context/DropdownContext.tsx`
+
+### 5. Services（Lite 自定义）
+- `services/appService.ts` — BaseAppService（含 hasAmbientLightSensor/databaseExists/deleteDatabase 等 Lite 适配）
+- `services/cloudService.ts` — Lite 无云同步
+- `services/libraryService.ts` — 本地库 + vault 加密
+- `services/settingsService.ts` — 本地设置 + vault 加密
+- `services/environment.ts`, `services/runtimeConfig.ts`, `services/constants.ts`
+- `services/remoteDownload.ts`, `services/transferManager.ts`, `services/transferMessages.ts`
+- `services/bookService.ts`, `services/bookContent.ts`, `services/transformService.ts`
+- `services/webAppService.ts`, `services/nativeAppService.ts`, `services/nodeAppService.ts`
+- `services/backupService.ts`, `services/fontService.ts`, `services/imageService.ts`
+- `services/ingestService.ts`, `services/persistence.ts`, `services/errors.ts`, `services/commandRegistry.ts`
+
+### 6. Utils（Lite 自定义）
+- `utils/access.ts` — Lite 全部允许（不是上游的 Pro 限制）
+- `utils/localStorage.ts` — 本地 FS + 分块上传 + HMAC 签名 URL
+- `utils/db.ts` — Prisma 客户端封装
+- `utils/localAuth.ts` — 本地 JWT
+- `utils/crdt.ts`, `utils/vaultState.ts`, `utils/deeplink.ts`, `utils/filenameDetect.ts`
+- `utils/downloadRunner.ts`, `utils/transfer.ts`, `utils/fetch.ts`, `utils/object.ts`
+- `utils/proxy.ts`, `utils/supabase.ts`（如有，stub）
+
+### 7. Stubs（Lite 无此功能，提供 no-op 导出）
+- `services/sync/cloudSyncProvider.ts` — 无云同步 provider（CloudSyncGate 返回 readest=false/backends=[]/paused=false）
+- `services/sync/file/runLibrarySync.ts` — no-op download/upload
+
+### 8. Types（Lite 自定义）
+- `types/settings.ts` — SystemSettings + Lite 字段（proxyEnabled, libraryThenSortBy, librarySkeuomorphicCovers 等）
+- `types/book.ts` — Book + Lite 字段（metadataUpdatedAt, feedUrl 等）
+- `types/records.ts` — DBBook/DBBookConfig（Prisma 类型，含 metadata_updated_at 列）
+- `types/system.ts` — AppService interface（含 hasAmbientLightSensor 等 Lite 适配字段）
+- `types/quota.ts` — Lite 配额类型
+- `types/view.ts`, `types/misc.ts`, `types/database.ts`
+
+### 9. Store（Lite 自定义，可 additive）
+- `store/libraryStore.ts` — Lite 库 store
+- `store/readerStore.ts` — additive OK（可加方法，不能删 Lite 已有的）
+- `store/settingsStore.ts`, `store/transferStore.ts`, `store/appLockStore.ts` 等
+
+### 10. Libs（Lite 自定义）
+- `libs/shareServer.ts` — HMAC 签名
+- `libs/storage.ts` — Lite 存储抽象
+- `libs/sync.ts`, `libs/user.ts`, `libs/document.ts`, `libs/metadata.ts`, `libs/edgeTTS.ts`
+
+### 11. Components（Lite 自定义）
+- `components/AboutWindow.tsx` — Lite 品牌 + 版本号（从 package.json 读，不是上游的 0.x.x）
+- `components/Bookshelf.tsx`, `components/UserInfo.tsx`
+
+### 12. Hooks（Lite 自定义）
+- `hooks/useUserActions.ts` — **不能 import useEnv/envConfig**（CI 必挂）
+- `hooks/useQuotaStats.ts` — 不要用 user?.storageQuotaMB（CI 必挂）
+
+---
+
 ## 绝对红线
 
 - 不要动 useQuotaStats.ts 用 Supabase User 上不存在的字段（CI 必挂）
@@ -263,6 +346,144 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 8. RemoteDownloadDialog 不调 useBooksSync（用 eventDispatcher）
 9. **git -C 确保正确目录**，不要把根仓库文件提交到 readest-lite
 10. **上传大文件必须分块**（v8.8）—— 不要走整文件 PUT，CF 100s 超时会返 524；块大小 5MB，index=0 时服务端自动清理上次失败残留的 parts
+11. **大型上游合并必须 diff 类型定义文件**（v8.15 踩过 9 轮）—— 上游改了大量 interface（BookDoc、SectionItem、AppService、ReaderStore、NoteExportConfig、CloudSyncGate、DBBook、BookMetadata），Lite 必须逐个对照并补全。push 前先 `diff upstream/document.ts lite/document.ts`、`diff upstream/types/system.ts lite/types/system.ts` 等等
+12. **接口扩展时同时检查实现**（v8.15 踩过）—— ReaderStore 在接口里声明了 8 个新方法，但 create 里漏实现，TS 报「missing properties from type」错误。每次扩展 interface 都要 grep 实现位置
+13. **目录改名时检查导入路径**（v8.15 踩过）—— `color/` → `theme/` 改名后，`WordLensPanel.tsx` 的 `'../../primitives'` 变成 `'../primitives'`（因为目录层级变了）。所有跨目录的 relative import 都要重新验证
+14. **Next.js standalone 对 Node 内置模块有 namespace 转换**（v8.14.2 踩过）—— `await import('stream')` 在 standalone 打包后 `Readable` 为 undefined（stream 的 module.exports 是函数不是 object）。改用同步 `require('stream')` 不受影响
+
+---
+
+## 🔧 Git/CI 操作手册（新 AI 必读）
+
+### 仓库地址
+- **代码仓库**：`https://github.com/cshdotcom/readest-lite`
+- **文档站点仓库**：`https://github.com/cshdotcom/readestl`（GitHub Pages）
+- **本地路径**：代码 `/home/z/my-project/workspace/readest-repo`，文档 `/home/z/my-project/workspace/readestl-pages`
+- **Docker 镜像**：`ghcr.io/cshdotcom/readest-lite`
+- **社区**：`https://nodebyte.cn`
+
+### Git Token 获取（CI 状态检查 / Release 创建需要）
+```bash
+TOKEN=$(grep -oP 'x-access-token:\K[^@]+' /home/z/my-project/workspace/readest-repo/.git/config | head -1)
+```
+
+### CI 状态检查
+```bash
+# 查最近 5 次 workflow run
+curl -s -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/cshdotcom/readest-lite/actions/runs?per_page=5" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(r['head_sha'][:7], r['name'], r['status'], r['conclusion']) for r in d.get('workflow_runs',[])[:6]]"
+
+# 下载失败 job 的日志
+RUN_ID=$(curl -s -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/cshdotcom/readest-lite/actions/workflows/ci.yml/runs?per_page=1" | python3 -c "import sys,json; print(json.load(sys.stdin)['workflow_runs'][0]['id'])")
+JOB_ID=$(curl -s -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/cshdotcom/readest-lite/actions/runs/$RUN_ID/jobs" | python3 -c "import sys,json; print(json.load(sys.stdin)['jobs'][0]['id'])")
+curl -s -L -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/cshdotcom/readest-lite/actions/jobs/$JOB_ID/logs" -o /tmp/ci-build.log
+grep -nE "Type error|Attempted import|Cannot find|Module not found" /tmp/ci-build.log | head -10
+```
+
+### CI Workflow 说明
+- **CI** (`ci.yml`)：Build Docker image + Smoke test（启动 + 登录 + API 响应）— **必须 success**
+- **Docker Image** (`docker-image.yml`)：构建并推送到 GHCR — **必须 success**
+- **CodeQL Advanced** (`codeql.yml`)：安全扫描 — **既有失败**（Rust extractor 配置问题，Lite 是 web-only 不需要 Rust 扫描），**不阻塞发布**，可忽略
+
+### 创建 GitHub Release
+```bash
+# release notes 写到文件
+cat > /tmp/release_notes.md <<'EOF'
+# v8.x.0 — 标题
+...（changelog 内容）
+EOF
+
+# 用 Python 脚本创建 Release（脚本在 /home/z/my-project/scripts/）
+python3 /home/z/my-project/scripts/create_v8_15_0_release.py
+# 或仿照此脚本写新版本
+```
+
+### package.json version 同步规则
+**每次发版必须更新** `apps/readest-app/package.json` 的 `version` 字段：
+```json
+{
+  "name": "@readest/readest-app",
+  "version": "8.15.0"  // ← 必须与 git tag 一致
+}
+```
+不更新的后果：「关于」页面显示错误版本号（v8.13.1 踩过，卡在上游的 0.11.4）。
+
+---
+
+## 📋 非覆盖式合入标准流程（上游 release 时必跟）
+
+> 当上游 Readest 发布新 release（如 v0.13.0）时，按此 checklist 操作。
+
+### Step 1：克隆上游 tag 到临时目录
+```bash
+cd /tmp
+git clone --depth 1 --branch v0.13.0 https://github.com/readest/readest.git readest-v0130
+```
+
+### Step 2：对比版本，确定改动范围
+- 阅读上游 release notes
+- `git log v0.12.1..v0.13.0 --oneline` 数 commit 数量
+- 评估改动规模（小：1-2 轮 CI 修复；大：5-10 轮）
+
+### Step 3：逐 PR / 逐文件分类
+将上游改动分三类：
+- **A. 可直接复制**：Lite 未自定义的文件（reader hooks、TTS providers、theme 组件等）→ 直接 `cp`
+- **B. 需外科手术补丁**：Lite 自定义文件（见「Lite 自定义文件完整清单」）→ 只加新字段/新方法，不覆盖整个文件
+- **C. 不适用**：云同步 / Pro 付费 / Google Drive / S3 等 Lite 没有的功能 → 创建 stub 或跳过
+
+### Step 4：执行合入
+```bash
+cd /home/z/my-project/workspace/readest-repo
+
+# A 类：直接复制
+cp /tmp/readest-v0130/apps/readest-app/src/app/reader/hooks/useNewFeature.ts apps/readest-app/src/app/reader/hooks/
+
+# B 类：手动 diff 后补丁
+diff /tmp/readest-v0130/apps/readest-app/src/libs/document.ts apps/readest-app/src/libs/document.ts
+# 只加上游新增的字段/方法，保留 Lite 已有的改动
+
+# C 类：创建 stub 或跳过
+# 如 cloudSyncProvider.ts — 已有 stub，只需更新接口形状匹配上游
+```
+
+### Step 5：更新 package.json version
+```bash
+# 编辑 apps/readest-app/package.json，把 version 改成新的 Lite 版本号
+```
+
+### Step 6：提交、推送、监控 CI
+```bash
+git add -A
+git commit -m "feat(v8.x.0): merge upstream Readest v0.13.0"
+git push origin main
+
+# 等 5-8 分钟，检查 CI
+# 如果失败 → 下载日志 → 修复 → 再 push（可能需要 5-10 轮）
+```
+
+### Step 7：CI 全绿后
+```bash
+# 打 tag
+git tag v8.x.0 <commit-sha> -m "v8.x.0 — 描述"
+git push origin v8.x.0
+
+# 等 tag-triggered Docker build 完成
+
+# 创建 GitHub Release
+python3 /home/z/my-project/scripts/create_v8_x_0_release.py
+```
+
+### Step 8：更新文档
+```bash
+# 1. CHANGELOG.md（在 readest-repo 里）
+# 2. README.md badge + feature table（在 readest-repo 里）
+# 3. ITERATION_PROMPT.md（在 readestl-pages 里）— 头部版本号 + 新增改动清单 + CI 教训
+# 4. index.html（在 readestl-pages 里）— hero meta + 高频迭代 card + roadmap
+# 5. deploy.html（在 readestl-pages 里）— 最新功能段 + 镜像 tag 示例
+
+# 推送两个仓库
+cd /home/z/my-project/workspace/readest-repo && git push origin main
+cd /home/z/my-project/workspace/readestl-pages && git push origin main
+```
 
 ---
 
@@ -275,8 +496,10 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.8.0
-**最后更新**：2026-06-21
-**适用 commit**：`8527223` 及之后
-**CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`
+**版本**：v8.15.0
+**最后更新**：2026-08-26
+**适用 commit**：`74305a0` 及之后（v8.15.0 tag 指向）
+**CI 状态**：✅ Docker Image + CI smoke test success（⚠️ CodeQL Advanced 既有失败，Rust extractor 配置问题，不阻塞发布）
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.15.0` / `8.15` / `sha-74305a0` / `latest`
+**GitHub Release**：https://github.com/cshdotcom/readest-lite/releases/tag/v8.15.0
+**上游对应版本**：Readest v0.12.1
