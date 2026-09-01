@@ -162,8 +162,11 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 11. **daisyUI 5 / Tailwind 4 迁移必须先做**（v8.16 踩过）—— 这是基础，所有其他文件都依赖新的 CSS 框架
 12. **Tauri 原生模块在 web 构建中不可用**（v8.16 踩过）—— `@tauri-apps/plugin-biometric` 和 `tauri-plugin-turso` 需要 stub 到真实文件
 13. **pdfjs vendor 文件触发 TS 错误**（v8.16 踩过）—— 需要 `typescript.ignoreBuildErrors = true`
-14. **stub 模块的返回值形状必须与调用方期望完全一致**（v8.16 踩过，主页崩溃）—— stub 不是随便写个空函数就行，必须仔细对照调用方代码的属性访问路径。CI 的 smoke test 只检查 API 不检查前端，必须额外添加前端页面加载检查
-15. **CI smoke test 必须检查前端页面**（v8.16 踩过）—— 只检查 API 端点会让运行时 JS 崩溃溜过去。smoke test 现在已添加前端 HTML 检查（DOCTYPE + JS chunks + 无错误字符串）
+14. **stub 模块的返回值形状必须与调用方期望完全一致**（v8.16 踩过，主页崩溃）—— stub 不是随便写个空函数就行，必须仔细对照调用方代码的属性访问路径
+15. **CI smoke test 必须检查前端页面**（v8.16 踩过）—— 只检查 API 端点会让运行时 JS 崩溃溜过去
+16. **SSG 预渲染会崩溃客户端 Context + WASM 页面**（v8.16 踩过，登录页 useVault 崩溃 + library jieba WASM 崩溃）—— Next.js SSG 在服务端预渲染时，客户端 React contexts（VaultProvider/AuthProvider）和 WASM 模块（jieba-wasm）无法正确初始化。**解决方案**：所有 `'use client'` 页面用 SSG-safe 包装器包裹（`lazy(() => import('./Client'))` + `mounted` gate + `Suspense`），SSG 时只渲染 loading spinner，挂载后 lazy-load 真实页面
+17. **Providers.tsx 不能在 VaultProvider 之前 early return**（v8.16 踩过）—— v0.12.6 的 `if (!appService) return;` 在 VaultProvider 之前，导致初始加载时 auth 页面的 `useVault()` 崩溃。VaultProvider/AuthProvider 必须始终挂载，只有 app shell（CommandPalette/AtmosphereOverlay 等）可以门控
+18. **批量复制必须保留 Lite 自定义文件**（v8.16 踩过）—— library/page.tsx、AboutWindow.tsx、manifest.json、_app.tsx 都被 v0.12.6 覆盖，丢失了远程下载、Lite 品牌、中文描述等特色。**必须在 SKIP_PATTERNS 中列出所有 Lite 自定义文件**
 
 ---
 
@@ -176,8 +179,10 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.8.0
-**最后更新**：2026-06-21
-**适用 commit**：`8527223` 及之后
-**CI 状态**：✅ Docker Image + CI smoke test success
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`
+**版本**：v8.16.0
+**最后更新**：2026-09-01
+**适用 commit**：`bfeba5c` 及之后（v8.16.0 tag 指向）
+**CI 状态**：✅ Docker Image + CI smoke test success（含前端页面加载检查）
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.16.0` / `8.16` / `sha-bfeba5c` / `latest`
+**GitHub Release**：https://github.com/cshdotcom/readest-lite/releases/tag/v8.16.0
+**上游对应版本**：Readest v0.12.6
