@@ -167,6 +167,7 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 16. **SSG 预渲染会崩溃客户端 Context + WASM 页面**（v8.16 踩过，登录页 useVault 崩溃 + library jieba WASM 崩溃）—— Next.js SSG 在服务端预渲染时，客户端 React contexts（VaultProvider/AuthProvider）和 WASM 模块（jieba-wasm）无法正确初始化。**解决方案**：所有 `'use client'` 页面用 SSG-safe 包装器包裹（`lazy(() => import('./Client'))` + `mounted` gate + `Suspense`），SSG 时只渲染 loading spinner，挂载后 lazy-load 真实页面
 17. **Providers.tsx 不能在 VaultProvider 之前 early return**（v8.16 踩过）—— v0.12.6 的 `if (!appService) return;` 在 VaultProvider 之前，导致初始加载时 auth 页面的 `useVault()` 崩溃。VaultProvider/AuthProvider 必须始终挂载，只有 app shell（CommandPalette/AtmosphereOverlay 等）可以门控
 18. **批量复制必须保留 Lite 自定义文件**（v8.16 踩过）—— library/page.tsx、AboutWindow.tsx、manifest.json、_app.tsx 都被 v0.12.6 覆盖，丢失了远程下载、Lite 品牌、中文描述等特色。**必须在 SKIP_PATTERNS 中列出所有 Lite 自定义文件**
+19. **合并后必须逐文件对比 v0.8.0 基线**（v8.16 踩过，通过 v8.8.0 对比发现 6 个回归）—— VaultProvider 被完全移除、databaseExists/deleteDatabase 从 BaseAppService 丢失、hasAmbientLightSensor 丢失、app/layout.tsx 元数据被还原为上游、LegalLinks/SupportLinks URLs 被还原为 readest.com。**每次大型上游合并后，必须用 `git diff v8.8.0..HEAD -- <file>` 逐个检查所有 Lite 自定义文件**
 
 ---
 
@@ -179,10 +180,8 @@ K_enc = encryptToEnvelope(K, KE) → 存服务端 User.encryptedVaultKey
 
 ---
 
-**版本**：v8.16.0
-**最后更新**：2026-09-01
-**适用 commit**：`bfeba5c` 及之后（v8.16.0 tag 指向）
-**CI 状态**：✅ Docker Image + CI smoke test success（含前端页面加载检查）
-**镜像**：`ghcr.io/cshdotcom/readest-lite:8.16.0` / `8.16` / `sha-bfeba5c` / `latest`
-**GitHub Release**：https://github.com/cshdotcom/readest-lite/releases/tag/v8.16.0
-**上游对应版本**：Readest v0.12.6
+**版本**：v8.8.0
+**最后更新**：2026-06-21
+**适用 commit**：`8527223` 及之后
+**CI 状态**：✅ Docker Image + CI smoke test success
+**镜像**：`ghcr.io/cshdotcom/readest-lite:8.8.0` / `8.8` / `latest`
