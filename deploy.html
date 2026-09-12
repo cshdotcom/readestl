@@ -145,10 +145,12 @@ docker --version</pre>
   -e ADMIN_EMAIL=admin@example.com \
   -e ADMIN_PASSWORD=changeme \
   -e ADMIN_USERNAME=Admin \
+  -e SUPER_ADMIN_EMAIL=admin@example.com \
   -e PUBLIC_BASE_URL=https://read.yourdomain.com \
   --restart unless-stopped \
   ghcr.io/cshdotcom/readest-lite:latest</pre>
       <div class="note warn">请务必修改默认密码，生产环境使用 16 位以上随机字符串。</div>
+      <div class="note tip"><strong>💡 超级管理员：</strong>设 <code>SUPER_ADMIN_EMAIL</code> 与 <code>ADMIN_EMAIL</code> 相同即可获得 super_admin 角色（可创建/管理 admin），重启容器后自动生效。</div>
 
       <h3>CLI 方式环境变量说明</h3>
       <p>通过 <code>docker run -e</code> 传递，常用 env：</p>
@@ -156,6 +158,7 @@ docker --version</pre>
         <li><code>ADMIN_EMAIL</code>（必填）：管理员邮箱，首次启动自动创建账号</li>
         <li><code>ADMIN_PASSWORD</code>（必填）：管理员密码，建议 16+ 位随机字符串</li>
         <li><code>ADMIN_USERNAME</code>（可选，v8.1 新增）：管理员显示名，用户列表里展示用。未设置时回退到邮箱</li>
+        <li><code>SUPER_ADMIN_EMAIL</code>（可选，v8.23 新增）：<strong>设为与 ADMIN_EMAIL 相同的值</strong>即可获得 super_admin 角色（可创建/管理 admin），重启容器后自动生效</li>
         <li><code>PUBLIC_BASE_URL</code>（可选，反向代理场景必填）：对外访问 URL，用于生成上传/下载文件的签名 URL。例如 <code>https://read.yourdomain.com</code>。未设置时默认 <code>http://localhost:8225</code>，浏览器外不可达</li>
         <li><code>PORT</code>（可选，默认 8225）：容器内监听端口，一般不需修改</li>
         <li><code>DEEPL_ENABLED=true</code>（可选）：启用 DeepL 翻译，需配合 <code>DEEPL_FREE_API_KEYS</code> 或 <code>DEEPL_PRO_API_KEYS</code></li>
@@ -187,6 +190,8 @@ docker --version</pre>
       <h3>.env</h3>
 <pre><button class="cbtn" onclick="cp(this)">&#9112;</button><span class="f">ADMIN_EMAIL</span>=<span class="v">admin@example.com</span>
 <span class="f">ADMIN_PASSWORD</span>=<span class="v">your-secure-password</span>
+<span class="cm"># 超级管理员（推荐设为与 ADMIN_EMAIL 相同的值）</span>
+<span class="f">SUPER_ADMIN_EMAIL</span>=<span class="v">admin@example.com</span>
 <span class="f">PORT</span>=<span class="v">8225</span>
 <span class="cm"># 可选：反向代理场景必填</span>
 <span class="f">PUBLIC_BASE_URL</span>=<span class="v">https://read.yourdomain.com</span>
