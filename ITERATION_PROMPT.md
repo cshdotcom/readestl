@@ -1,18 +1,49 @@
-# Readest Lite — 迭代提示词（v8.23.0）
+# Readest Lite — 迭代提示词（v8.24.0）
 
 > 这是 Readest Lite 的「持续迭代提示词」。每次新对话开始时把它丢给助手，能让
 > 助手快速进入「Lite 维护者」上下文，避免每次都重复解释 Lite 与上游 Readest
 > 的区别、为什么某个文件不能改、为什么某个 URL 必须是相对路径，等等。本文档
-> 涵盖从 v8.0 到 v8.23.0 的所有设计决策、迁移、API 端点和 Lite 自定义文件。
+> 涵盖从 v8.0 到 v8.24.0 的所有设计决策、迁移、API 端点和 Lite 自定义文件。
 
-
-**最后更新**：2026-09-12
-**适用 commit**：da94d65
-**适用版本**：v8.23.1
+**最后更新**：2026-09-23
+**适用 commit**：6222b0c
+**适用版本**：v8.24.0
 
 ---
 
 
+## 当前状态（v8.24.0 — 上游 v0.12.10 合并进行中）
+
+### CI 状态
+- **CI 可能在失败中**。v8.24.0 正在合并上游 v0.12.8 → v0.12.10（93 commits, 220+ 文件）
+- 如果 CI 失败，检查是 TS 错误还是 OOM（内存不足）
+- **OOM 修复**：Dockerfile 中 `NODE_OPTIONS="--max-old-space-size=6144"`（已从 4096 升到 6144）
+- 如果还有 TS 错误，继续修复（见下方「已知问题」）
+
+### 上游 v0.12.10 新功能（已合并的代码）
+- Library: 可配置书架（bookshelves）+ 批量标签（TaggingModal）
+- Reader: HTML 文件作为书籍打开 + Paragraph Mode 选择/高亮
+- Reader: PDF/CBZ 翻页动画 + 宽幅漫画分页
+- Reader: 外部链接确认 + 下拉书签手势
+- TTS: 词典查词自动播放发音
+- Sync: WebDAV 可靠性改进 + Readwise 导出包含书签
+- OPDS: 从 OPDS 目录流式播放有声书
+- Backup: 更快 + 保持屏幕常亮
+- 修复: 启动冻结、图片密集章节卡顿、脚注图片
+
+### 已知问题（如果 CI 还在失败，修这些）
+1. **ReaderContent.tsx**：AudiobookPairingDialog 已用 Python regex 移除，但 `audiobookBookKey` 变量声明和 `setAudiobookBookKey` 调用可能残留 — 用 `_` 前缀标记为未使用
+2. **headerFooterStyle.ts**：`isHexColor` 函数签名已改为 `string | undefined | null`，`HEX_COLOR.test(value || "")` 加了空字符串回退
+3. **document.ts**：`EXTS` 和 `MIMETYPES` 需要包含 `BOOKORBIT` 和 `OPDSAUDIO`（BookFormat 类型已添加）
+4. **各种 store 类型**：absServerStore 需要 `getAvailableServers` 方法、readerStore 需要 `ttsSectionIndex`、LocalSendStore 需要 `status/setStatus/pendingRequest/setDevices`
+5. **payment 文件**：entitlements.ts 已 stub（Supabase API）
+6. **Supabase-only API 路由**：`/api/stats/compact`、`/api/stats/restore`、`/api/stripe/*` 已删除
+
+### 修复策略
+- **不要用 sed** 修改 TSX 文件！sed 会破坏 JSX 语法。用 Python 或 Edit 工具
+- **遇到 TS 类型错误**：优先添加 stub/类型扩展，不要删除上游文件
+- **遇到 OOM**：增大 Dockerfile 的 `--max-old-space-size`
+- **遇到 Module not found**：创建空 stub 文件（返回 null 的组件或空导出的 hook）
 
 ## 项目定位
 
