@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Readest Lite — 轻量自部署，阅读无界</title>
-  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。v8.24：合并上游 v0.12.10 · 可配置书架 · 书籍标签 · 标注编辑器重构 · 段落选择 · Header/Footer 样式自定义 · 阅读器外链确认 · FileSyncReport · Readera 注解 provider。支持 EPUB/PDF/MOBI、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署，持续高频迭代。">
+  <meta name="description" content="Readest Lite 基于 Readest 二开，去除付费限制，保留全部核心功能。自 v8.23.2 起与上游分道扬镳，基于稳定基线独立维护。包含：回收站批量 · 跨用户文件管理 · 分组管理 Modal · Notion 同步 · ReadEra 注释导入 · 带登录网页小说导入 · 超级管理员 ENV 识别。支持 EPUB/PDF/MOBI、TTS、云端同步、多用户管理、Edge TTS、字体本地化，单 Docker 部署。">
   <meta name="keywords" content="Readest Lite,轻量阅读器,自部署阅读器,开源阅读器,EPUB阅读器,PDF阅读器,TTS朗读,云端同步,批注,Docker阅读器,私有化部署,无限存储,多用户,远程下载,Web搜索,Edge TTS,翻译代理">
   <meta name="author" content="cshdotcom">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -20,9 +20,12 @@
   <meta name="twitter:title" content="Readest Lite — 轻量自部署，阅读无界">
   <meta name="twitter:image" content="https://cshdotcom.github.io/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Readest Lite","url":"https://cshdotcom.github.io/","description":"基于 Readest 的轻量化自部署阅读器","applicationCategory":"BookApplication","operatingSystem":"Docker","offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},"author":{"@type":"Organization","name":"cshdotcom","url":"https://github.com/cshdotcom"},"isBasedOn":{"@type":"SoftwareApplication","name":"Readest","url":"https://github.com/readest/readest"}}</script>
   <style>
-    :root{--bg:#07070c;--bg2:#0d0d14;--card:#12121b;--card-h:#181824;--fg:#eeeef4;--fg2:#8e8ea6;--muted:#555570;--accent:#6c5ce7;--accent-l:#a29bfe;--accent-g:rgba(108,92,231,.25);--teal:#00cec9;--teal-g:rgba(0,206,201,.15);--pink:#fd79a8;--green:#00b894;--grad1:linear-gradient(135deg,#6c5ce7,#a29bfe);--grad3:linear-gradient(135deg,#6c5ce7,#00cec9);--border:rgba(255,255,255,.05);--border-h:rgba(255,255,255,.1);--r:14px;--r-sm:8px;--r-lg:22px;--shadow:0 8px 32px rgba(0,0,0,.5);--ease:.3s cubic-bezier(.4,0,.2,1);--sans:system-ui,-apple-system,'Segoe UI','Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;--mono:'JetBrains Mono','Fira Code',monospace}
+    :root{--bg:#07070c;--bg2:#0d0d14;--card:#12121b;--card-h:#181824;--fg:#eeeef4;--fg2:#8e8ea6;--muted:#555570;--accent:#6c5ce7;--accent-l:#a29bfe;--accent-g:rgba(108,92,231,.25);--teal:#00cec9;--teal-g:rgba(0,206,201,.15);--pink:#fd79a8;--green:#00b894;--grad1:linear-gradient(135deg,#6c5ce7,#a29bfe);--grad3:linear-gradient(135deg,#6c5ce7,#00cec9);--border:rgba(255,255,255,.05);--border-h:rgba(255,255,255,.1);--r:14px;--r-sm:8px;--r-lg:22px;--shadow:0 8px 32px rgba(0,0,0,.5);--ease:.3s cubic-bezier(.4,0,.2,1);--sans:'Inter','Noto Sans SC',system-ui,-apple-system,sans-serif;--mono:'JetBrains Mono','Fira Code',monospace}
     html[data-theme="light"]{--bg:#fafafe;--bg2:#f2f2f8;--card:#fff;--card-h:#f5f5fa;--fg:#1a1a2e;--fg2:#5f5f78;--muted:#9494a8;--accent-g:rgba(108,92,231,.12);--border:rgba(0,0,0,.05);--border-h:rgba(0,0,0,.1);--shadow:0 8px 32px rgba(0,0,0,.06)}
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}::selection{background:var(--accent);color:#fff}a{color:var(--accent-l);text-decoration:none;transition:var(--ease)}a:hover{color:var(--accent)}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
     .bg-mesh{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}.bg-mesh .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.3;animation:orbF 25s ease-in-out infinite}.bg-mesh .orb:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,var(--accent-g),transparent 70%);top:-200px;right:-100px}.bg-mesh .orb:nth-child(2){width:400px;height:400px;background:radial-gradient(circle,var(--teal-g),transparent 70%);bottom:-100px;left:-100px;animation-delay:-8s}@keyframes orbF{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
@@ -72,7 +75,6 @@
         Readest <span class="lite">LITE</span>
       </a>
       <ul class="nav-links">
-        <li><a href="https://nodebyte.cn" target="_blank" rel="noopener noreferrer" style="color:#e17055;font-weight:700;">💬 社区</a></li>
         <li><a href="#features">功能</a></li>
         <li><a href="#iteration">迭代</a></li>
         <li><a href="#roadmap">计划</a></li>
@@ -95,9 +97,8 @@
       <div class="hero-text">
         <div class="hero-badge"><span class="dot"></span>基于 Readest 二开 · 轻量自部署</div>
         <h1>轻量自部署<br><span class="gt">阅读无界</span></h1>
-        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。v8.24 新增：合并上游 v0.12.10（可配置书架 · 书籍标签 · 标注编辑器重构 · 段落选择 · Header/Footer 样式自定义 · 阅读器外链确认 · FileSyncReport · Readera 注解 provider · MP3/Spread/HTML book 工具）。单容器 Docker 部署，数据完全自主。</p>
+        <p>Readest Lite 基于 Readest 深度定制，去除付费体系，保留全部核心功能。<strong style="color:var(--accent-l)">自 v8.23.2 起与上游分道扬镳</strong>，基于稳定基线独立维护。包含：回收站批量 · 跨用户文件管理 · 分组管理 Modal · Notion 同步 · ReadEra 导入 · 带登录网页小说导入 · 超级管理员 ENV 识别 · 资源全面本地化。单容器 Docker 部署，数据完全自主。</p>
         <div class="hero-actions">
-          <a href="https://nodebyte.cn" target="_blank" rel="noopener noreferrer" class="btn" style="background:linear-gradient(135deg,#e17055,#fdcb6e);color:#fff;font-size:1.05rem;padding:14px 32px;box-shadow:0 4px 20px rgba(225,112,85,.4)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>💬 NodeByte 社区</a>
           <a href="/readestl/deploy.html" class="btn btn-p"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>一键部署</a>
           <a href="https://github.com/cshdotcom/readest-lite" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>GitHub</a>
           <a href="https://github.com/cshdotcom/Readest-lite-Android" target="_blank" rel="noopener noreferrer" class="btn btn-s"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>安卓自编译</a>
@@ -136,7 +137,7 @@
         <article class="f-card rv"><div class="f-ico p">&#128451;</div><h3>实际无上限存储</h3><p>100TB 软上限（不强制），实际只受磁盘空间约束。书籍、封面存于本地挂载卷，数据完全自主。</p></article>
       </div>
 
-      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 · v8.9 · v8.10 · v8.11 · v8.12 · v8.13 · v8.14 · v8.15 · v8.16 · v8.17 · v8.18 · v8.19 · v8.21 · v8.22 · v8.23 · v8.24 新增</span></h3>
+      <h3 class="sub-h rv">自部署增强 <span class="sub-h-tag">v7.0 · v8.0 · v8.1 · v8.2 · v8.3 · v8.4 · v8.5 · v8.6 · v8.7 · v8.8 · v8.9 · v8.10 · v8.11 · v8.12 · v8.13 · v8.14 · v8.15 · v8.16 · v8.17 · v8.18 · v8.19 · v8.21 · v8.22 · v8.23 新增</span></h3>
       <div class="f-grid">
         <article class="f-card rv"><div class="f-ico t">&#128101;</div><h3>多用户管理</h3><p>管理员可创建普通用户，分配存储与翻译配额。<strong>v8.4：Per-user 加密 vault</strong>，library/settings 按 userId AES-GCM 加密，密码不存客户端，跨账号彻底隔离。<strong>v8.5：配额真正 enforce</strong>，超额上传/翻译被拒绝。普通用户独立空间，互不干扰。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128229;</div><h3>远程下载</h3><p>书库点「导入」→「Download from URL」，服务器自动抓取入库。<strong>v8.6：任务队列</strong>，有进度/状态/重试。<strong>v8.7：DownloadTask 表落库 + 用户中心面板</strong>，5s 轮询、批量操作、跨设备同步可见。<strong>v8.8：分块上传</strong>，大文件不再被 Cloudflare 524 超时打断。</p></article>
@@ -144,9 +145,6 @@
         <article class="f-card rv"><div class="f-ico b">&#128218;</div><h3>原版词典悬浮窗</h3><p>选中文字点「Dictionary」弹悬浮窗显示 Wikipedia/Wiktionary 查询结果，点「Translate」弹翻译悬浮窗。保留原版 Readest 完整体验，代理透传。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128266;</div><h3>Edge TTS</h3><p>服务器端 WebSocket 连接微软 Edge TTS，高质量语音合成，多语种多音色，零成本零依赖。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128292;</div><h3>字体本地化</h3><p>阅读字体打包进镜像，不依赖外部 CDN，离线环境也能保持一致的中文渲染效果。</p></article>
-        <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>可配置书架 + 书籍标签 <span class="sub-h-tag">v8.24 新增</span></h3><p>合并上游 v0.12.10：用户可自定义多个书架（按标签 / 状态 / 来源筛选），书库列表视图新增书签标签列与「Tag Books」批量操作。Tags 与书架状态独立持久化，跨设备同步。</p></article>
-        <article class="f-card rv"><div class="f-ico t">&#9999;</div><h3>标注编辑器重构 <span class="sub-h-tag">v8.24 新增</span></h3><p>AnnotationNoteEditor + NoteEditorSheet 取代旧的内联编辑器，支持长文笔记、Markdown 渲染、自动保存、段落选择。侧栏 BooknoteTime 显示每条笔记的时间戳。ExternalLinkConfirm 在阅读器内安全确认外链跳转。</p></article>
-        <article class="f-card rv"><div class="f-ico pk">&#127919;</div><h3>Header/Footer 样式 + FileSyncReport <span class="sub-h-tag">v8.24 新增</span></h3><p>阅读器顶/底栏可自定义字体大小、文字颜色、背景色与透明度（e-ink 自动忽略）。FileSyncReport 在同步完成后展示文件级报告，便于排查 cloud sync 异常。Readera 注解 provider 让 Lite 用户也能从 Readera 备份导入高亮。</p></article>
       </div>
     </div>
   </section>
@@ -193,16 +191,17 @@
 
   <section class="sec" id="iteration">
     <div class="sec-in">
-      <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">每周一个版本，永远在变好</h2><p class="sec-d">这不是一个"上线即弃"的项目。我们以周为节奏迭代，每个版本都解决真实用户反馈的问题。</p></div>
+      <div class="sec-hd rv"><div class="sec-tag">持续迭代</div><h2 class="sec-t">从 v8.23.2 起与上游分道扬镳，独立维护</h2><p class="sec-d">v8.0 → v8.23.2 我们持续合并上游；v8.24 合并尝试遇到严重回归后，决定不再跟踪上游，基于 v8.23.2 + 上游 v0.12.6 长期独立维护。后续只在用户提交 issue/PR 或修复 bug 时更新。</p></div>
       <div class="f-grid">
-        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>高频迭代</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524、v8.9-v8.10 中文汉化 + 阅读统计、v8.11-v8.12 合并上游 v0.11.17、v8.13 Auto Scroll + 翻页动画 + TTS 大改版、v8.14 RSS 订阅 + Issue #5 修复、v8.15 上游 v0.12.1 合并（TTS Media Overlays + 主题改名 + 注解 JSON 导出 + Command Palette）、v8.16 上游 v0.12.6 合并（daisyUI 5 + Tailwind 4 + Notebook + TTS 歌词视图）、v8.17-v8.18 上游 v0.12.6 移植 + feed:// 分享 + 加密设置同步、v8.19 回收站 + 文件去重 + 角色层级 super_admin > admin > user、v8.21 回收站批量 + 跨用户文件管理 + 分组管理 Modal、v8.22 Notion 同步 + ReadEra 导入 + 带登录网页小说导入 + CORS 修复、v8.23 删除有声书 + 删除 RSS favicon + 修复超级管理员 + 分组融合 + 资源全面本地化、v8.24 合并上游 v0.12.10（可配置书架 + 书籍标签 + 标注编辑器重构 + 段落选择 + Header/Footer 样式 + ExternalLinkConfirm + FileSyncReport + Readera 注解 provider + 移除管理员查看用户书籍功能），每个版本都有可见的功能落地。GitHub Actions CI 全程守护，每个版本都打 git tag。</p></article>
+        <article class="f-card rv"><div class="f-ico p">&#128640;</div><h3>历史迭代回顾（v7.0 → v8.23.2）</h3><p>v7.0 多用户、v8.0 代理强制登录、v8.1 修复远程下载、v8.2 代理开关 + Readest Lite 品牌、v8.3 账号切换数据隔离、v8.4 Per-user 加密 vault、v8.5 配额 enforce、v8.6 合并上游 0.11.12 + 分享永久 + 下载队列、v8.7 跨设备下载任务队列、v8.8 分块上传规避 CF 524、v8.9-v8.10 中文汉化 + 阅读统计、v8.11-v8.12 合并上游 v0.11.17、v8.13 Auto Scroll + 翻页动画 + TTS 大改版、v8.14 RSS 订阅 + Issue #5 修复、v8.15 上游 v0.12.1 合并（TTS Media Overlays + 主题改名 + 注解 JSON 导出 + Command Palette）、v8.16 上游 v0.12.6 合并（daisyUI 5 + Tailwind 4 + Notebook + TTS 歌词视图）、v8.17-v8.18 上游 v0.12.6 移植 + feed:// 分享 + 加密设置同步、v8.19 回收站 + 文件去重 + 角色层级 super_admin > admin > user、v8.21 回收站批量 + 跨用户文件管理 + 分组管理 Modal、v8.22 Notion 同步 + ReadEra 导入 + 带登录网页小说导入 + CORS 修复、v8.23 删除有声书 + 删除 RSS favicon + 修复超级管理员 + 分组融合 + 资源全面本地化。</p></article>
+        <article class="f-card rv" style="border-color:rgba(108,92,231,.4);background:var(--accent-g)"><div class="f-ico p">&#128080;</div><h3>🔀 与上游分道扬镳（v8.23.2 起）</h3><p><strong>不再跟踪上游</strong>：上游 v0.12.7+ 的新功能（iOS CarPlay / Android Auto / BookOrbit / KOReader / RSS / OPDS / localsend）不会进入 Lite。<strong>长期基线</strong>：v8.23.2 + 上游 v0.12.6，稳定可靠。<strong>更新策略</strong>：只在①用户提交 bug ②用户提 PR 加特色功能 ③安全修复 时更新。<strong>版本号</strong>：从 v8.23.3 开始递增，不再用 v8.24+ 避免与上游混淆。</p></article>
         <article class="f-card rv"><div class="f-ico t">&#128736;</div><h3>社区驱动 · NodeByte</h3><p>用户反馈的 bug 和功能建议直接进迭代队列。从 100TB 配额、字体本地化到 DeepL 切换，每项都源自真实部署场景。<strong>所有问题优先前往 <a href="https://nodebyte.cn" style="color:var(--accent-l);font-weight:700;">NodeByte 社区</a> 反馈</strong>，作者亲自在社区回答问题。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128230;</div><h3>回收站 + 跨用户文件管理</h3><p><strong>v8.19 回收站</strong>：删除书籍 30 天可恢复，批量恢复/删除。<strong>v8.21 管理员文件管理</strong>：浏览所有用户文件，批量移动/复制到其他用户，支持多目标批量复制。<strong>v8.22 分组管理</strong>：书库三点菜单 → 分组管理 Modal，搜索/添加/编辑/删除/排序。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#128221;</div><h3>Notion 同步 + ReadEra 导入</h3><p><strong>v8.22 Notion 同步</strong>：代理路由绕过 CORS，同步笔记到 Notion 数据库。<strong>ReadEra 注释导入</strong>：从 ReadEra 备份导入高亮/书签/进度。<strong>带登录网页小说导入</strong>：Cookie + 自定义请求头，支持需要登录的站点。</p></article>
         <article class="f-card rv"><div class="f-ico g">&#128260;</div><h3>零停机升级</h3><p>SQLite 自动迁移、数据卷持久化，<code>docker compose pull &amp;&amp; up -d</code> 一条命令完成升级，旧数据无损。</p></article>
         <article class="f-card rv"><div class="f-ico pk">&#128279;</div><h3>开源透明</h3><p>全代码 AGPL-3.0 开源，PR 与 issue 公开可见。每个 commit 都有详细的修改说明，便于审查与二开。</p></article>
         <article class="f-card rv"><div class="f-ico b">&#128187;</div><h3>CI 守护</h3><p>每次 push 自动跑 Docker 镜像构建 + smoke test，失败即阻塞合并。你拉到的每个镜像都验证过启动 + 登录 + API 响应。</p></article>
-        <article class="f-card rv"><div class="f-ico p">&#128218;</div><h3>原版对齐</h3><p>持续跟进上游 Readest 的内核升级，新格式支持、新 TTS 引擎、新批注能力都会第一时间落地到 Lite。</p></article>
+        <article class="f-card rv"><div class="f-ico g">&#9989;</div><h3>Lite 现有功能全部保留</h3><p>JWT 多用户、Prisma storage、回收站、跨用户文件管理、Notion 同步、ReadEra 导入、带登录网页小说导入、Edge TTS、字体本地化、代理翻译/词典、分组管理、分享永久链接 — 全部保留，不会因不合并上游而丢失。</p></article>
       </div>
     </div>
   </section>
@@ -219,7 +218,7 @@
           <li>&#9654; <strong>全文搜索</strong>：跨书籍内容搜索</li>
         </ul></article>
         <article class="f-card rv" style="border-color:rgba(0,184,148,.3)"><div class="f-ico g">&#9989;</div><h3>已完成</h3><ul style="list-style:none;padding:0;font-size:.84rem;color:var(--fg2);line-height:2">
-          <li>&#10003; v8.24 合并上游 v0.12.6 → v0.12.10（4-bucket 分类策略：A 纯上游 215 文件直接覆盖 · B Lite 自定义 19 文件三方合并 · C 跳过 92 文件 iOS/Android Auto/BookOrbit/KOReader/RSS/OPDS/localsend · D 测试 362 文件排除）。新增功能：可配置书架 + 书籍标签 + TaggingModal + 标注编辑器重构（AnnotationNoteEditor + NoteEditorSheet）+ 段落选择 + 侧栏 BooknoteTime + Header/Footer 样式自定义 + ExternalLinkConfirm + FileSyncReport + Readera 注解 provider + MP3/Spread/WindowPointerDrag/HTML book 工具 + ViewTransitions 重构。新增 stub：ABS ebook streaming / BookOrbit narration / audiobook media proxy / BlobAudioClock / audiobookshelf offline。用户反馈移除：管理员查看每个用户书籍功能（UserDetailModal UI + /api/admin/users/[id]/books + recycle-bin API 路由全部删除）</li>
+          <li><strong style="color:var(--accent-l)">🔀 v8.23.2 起：与上游 Readest 分道扬镳</strong> — 不再合并上游 v0.12.7+，基于 v8.23.2 + 上游 v0.12.6 长期独立维护。后续只在用户提交 issue/PR 或修复 bug 时更新。版本号从 v8.23.3 开始递增，不再用 v8.24+ 避免与上游混淆。</li>
           <li>&#10003; v8.23 删除有声书（加到 TODO）+ 删除 RSS favicon + 修复超级管理员 ENV 识别（init-admin.mjs 不再降级 super_admin）+ 分组管理与书库融合 + 资源全面本地化</li>
           <li>&#10003; v8.22 Notion 笔记同步 + ReadEra 注释导入 + 带登录网页小说导入 + CORS 错误根除（updater web 短路 + constants URL 本地化）</li>
           <li>&#10003; v8.21 回收站批量选择 + 管理员跨用户文件管理（移动/复制端点 + AdminFileTransfer 组件）+ 分组管理 Modal（搜索/添加/编辑/删除/排序）</li>

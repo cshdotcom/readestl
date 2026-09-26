@@ -1,9 +1,43 @@
-# Readest Lite — 迭代提示词（v8.24.0）
+# Readest Lite — 迭代提示词（v8.23.2，分道扬镳版）
 
 > 这是 Readest Lite 的「持续迭代提示词」。每次新对话开始时把它丢给助手，能让
 > 助手快速进入「Lite 维护者」上下文，避免每次都重复解释 Lite 与上游 Readest
 > 的区别、为什么某个文件不能改、为什么某个 URL 必须是相对路径，等等。本文档
-> 涵盖从 v8.0 到 v8.24.0 的所有设计决策、迁移、API 端点和 Lite 自定义文件。
+> 涵盖从 v8.0 到 v8.23.2 的所有设计决策、迁移、API 端点和 Lite 自定义文件。
+
+## 🔀 与上游分道扬镳声明（v8.23.2 起，最重要）
+
+**自 v8.23.2 起，Readest Lite 不再与上游 [readest/readest](https://github.com/readest/readest) 同步。**
+
+### 历史背景
+- v8.0 → v8.23.2：以「持续合并上游 + Lite 自定义改造」方式迭代，每次上游发版（v0.11.x → v0.12.6）都做三方合并。
+- v8.24.0 尝试合并上游 v0.12.10 时遇到严重回归（多次合并失败、功能丢失、CI 反复 fail），消耗大量精力后决定放弃。
+
+### 新策略（维护者必读）
+- **不再跟踪上游**：上游 v0.12.7+ 的新功能（iOS CarPlay / Android Auto / BookOrbit / KOReader / RSS / OPDS / localsend 等）不会进入 Lite。
+- **长期基线**：v8.23.2 + 上游 v0.12.6，稳定可靠，作为 Lite 的长期版本。
+- **只在以下情况更新**：
+  1. 用户在 NodeByte 社区或 GitHub Issues 提交 bug 报告
+  2. 用户提交 PR 增加自己想要的特色功能
+  3. 安全漏洞修复
+- **不再做上游合并**：不要尝试 `git fetch upstream` + 三方合并。即使上游发了 v0.13、v0.14 也不合并。
+- **Lite 自定义文件清单（§下文）仍然有效**：这些文件不能被任何上游改动覆盖（虽然现在不会再有上游改动了）。
+
+### 版本号策略
+- 后续版本号从 v8.23.3 开始递增（v8.23.3、v8.23.4...），仅用于标记 Lite 自己的修复/特色功能更新。
+- **不再使用 v8.24+** 以避免与上游版本号混淆。
+- 已删除 v8.24.0 tag（曾短暂存在过，已 reset 回 v8.23.2）。
+
+### 助手行为约束
+当用户要求「合并上游」「同步上游」「更新到上游最新版」时：
+1. **拒绝**，并引用本章节说明 Lite 已分道扬镳。
+2. 提醒用户：想要上游最新功能请用官方 [readest/readest](https://github.com/readest/readest)。
+3. 如果用户坚持要某个上游特定功能，建议从上游 cherry-pick **那一个 PR**，不要整版合并。
+
+当用户提交 bug 报告或 PR 时：
+1. 基于 v8.23.2 当前代码分析问题。
+2. 不要假设上游已经修复了某个 bug — 上游的修复可能依赖被 Lite 跳过的功能。
+3. 修复后版本号 bump 到 v8.23.x+1。
 
 ## 项目定位
 
@@ -98,120 +132,20 @@ apps/readest-app/src/components/localsend/LocalSendManager.tsx # 渲染 null
 apps/readest-app/src/components/settings/integrations/{ABSForm,LocalSendForm,cloudSync}.tsx
 apps/readest-app/src/app/reader/components/audiobook/AudiobookPairingDialog.tsx # 渲染 null
 
-# 用户管理（v8.19.0 + v8.24.0 移除 UserDetailModal）
-apps/readest-app/src/app/user/components/UserManagement.tsx # 含 AllUsersModal（v8.24.0 移除 UserDetailModal）
+# 用户管理（v8.19.0 + v8.19.4）
+apps/readest-app/src/app/user/components/UserManagement.tsx # 含 AllUsersModal + UserDetailModal
 
 # Pages Router API（Lite 专用，App Router `/api/admin/*` 由路由组而非文件构成）
 apps/readest-app/src/pages/api/storage/delete.ts    # v8.18.4 自动 revoke shares
 apps/readest-app/src/pages/api/settings/{index,save}.ts # v8.18.4 加密设置同步
+apps/readest-app/src/pages/api/admin/users/[id]/books.ts       # v8.19.4 admin 用户书籍列表
+apps/readest-app/src/pages/api/admin/users/[id]/recycle-bin.ts # v8.19.4 admin 用户回收站
 apps/readest-app/src/pages/api/recycle-bin/{index,restore,clear}.ts # v8.19.0 回收站
 apps/readest-app/src/pages/api/avatar/[id].ts       # v8.19.2 隐藏头像 URL
 
 # Library / Remote download UI
 apps/readest-app/src/app/library/components/RemoteDownloadDialog.tsx # v8.18.3 移除 Advanced Options
 apps/readest-app/src/app/library/components/ShareBookDialog.tsx # v8.18.4 永久+日历
-```
-
-## v8.24.0 上游合并摘要（v0.12.6 → v0.12.10）
-
-**合并策略**：4-bucket 分类（Python 脚本驱动），不再用「工作区直接覆盖」：
-- **A 纯上游** (215 文件)：直接覆盖
-- **B Lite 自定义需三方合并** (19 文件)：手动合并 7 个冲突，保留所有 Lite 定制
-- **C Lite 跳过的功能** (92 文件)：iOS CarPlay / Android Auto / BookOrbit audiobook /
-  KOReader / RSS / OPDS / localsend — 跳过 + 创建 stub
-- **D 测试** (362 文件)：从 `tsconfig.json` 排除
-
-**新增 v0.12.10 功能**（全部落地）：
-- 可配置书架（BookshelvesDialog + services/bookshelves/* 10 个文件）
-- 书籍标签 + TaggingModal
-- 书库分页 + 过滤编辑器
-- AnnotationNoteEditor + NoteEditorSheet（标注编辑器重构）
-- 段落选择、侧栏 BooknoteTime
-- Header/Footer 样式自定义
-- ExternalLinkConfirm 阅读器外链确认
-- FileSyncReport
-- Readera 注解 provider
-- MP3 时长 / Spread / WindowPointerDrag / HTML book 工具
-- ViewTransitions 重构
-
-**新增 stub**（v0.12.10 跳过的功能）：
-- ABS ebook streaming（`services/audiobookshelf/ebookFetch.ts`）
-- BookOrbit narration（`services/bookorbit/narration.ts`）
-- audiobook media proxy（`services/audiobook/mediaProxy.ts`）
-- BlobAudioClock（`services/audiobook/AudiobookClock.ts`）
-- audiobookshelf offline（`services/audiobookshelf/offline.ts`）
-- `absServerStore.findABSServerById`
-- `useABSProgressSync` + `useNotionSync` hooks
-- `CarMediaLibraryBridge`
-- Stripe portal flow type
-
-**新增类型字段**（types/book.ts + types/settings.ts）：
-- BookFormat: `OPDSAUDIO` / `BOOKORBIT` / `HTML`
-- Book: `absDownloadedAt` / `absMediaType='ebook'`
-- BookLayout: `scrolledDirection` / `webtoonMode` / `lockHorizontalPan` / `disablePullDownToBookmark`
-- ViewConfig: `headerFooterFontSize` / `headerFooterTextColor` / `headerFooterBackground` / `headerFooterBgOpacity`
-- TTSConfig: `ttsSkipInlineAnnotations`
-- TranslatorConfig: `translateSourceLang`
-- BookConfig: `widePages`
-- BooksGroup: `localized`
-- BookLookupIndex: `byStableKey`
-- SystemSettings: `bookshelves?: BookshelfState`
-- NotionSettings（完整版）+ BookOrbitSettings.autoSync + WebDAVBrowseSortByType
-
-**v8.24.0 用户反馈移除**：
-- Admin UserDetailModal（管理员查看每个用户书籍 + 回收站）— 详见 §19
-
-**关键操作命令**（合并上游时使用）：
-```bash
-# 1. 在 v8.23.2 上拉分支
-git checkout -b feat/v8.24-merge v8.23.2
-
-# 2. 添加上游 remote + fetch tags
-git remote add upstream https://github.com/readest/readest.git
-git fetch upstream --tags
-
-# 3. 分类（Python 脚本）
-python3 scripts/classify-upstream-changes.py  # → merge-buckets.json
-
-# 4. 复制 A 类
-python3 scripts/copy-bucket-a.py
-
-# 5. 应用 B 类（3-way merge）
-python3 scripts/apply-b-bucket.py
-
-# 6. 解决冲突
-python3 scripts/resolve-conflicts.py  # 然后手动 Edit 剩余的
-
-# 7. 装 packages（submodule 已删，需手动 clone）
-git clone --depth 1 https://github.com/readest/foliate-js.git packages/foliate-js
-git clone --depth 1 https://github.com/readest/simplecc-wasm.git packages/simplecc-wasm
-git clone --depth 1 https://github.com/readest/js-mdict.git packages/js-mdict
-
-# 8. 装依赖 + prisma generate（pnpm-stub 绕过 prisma 的 pnpm add 检查）
-pnpm install --filter @readest/readest-app
-printf '#!/bin/sh\nexit 0\n' > /tmp/pnpm-stub && chmod +x /tmp/pnpm-stub
-cp $(which pnpm) /tmp/pnpm.real && cp /tmp/pnpm-stub $(which pnpm)
-node node_modules/prisma/build/index.js generate --schema=../../prisma/schema.prisma
-cp /tmp/pnpm.real $(which pnpm)
-ln -sf /home/z/my-project/node_modules/.pnpm/@prisma+client@*/node_modules/.prisma node_modules/.prisma
-
-# 9. 复制 simplecc wasm 到 public/vendor
-mkdir -p public/vendor/simplecc && cp ../../packages/simplecc-wasm/dist/web/* public/vendor/simplecc/
-
-# 10. 跑 tsc 验证
-node ../../node_modules/typescript/bin/tsc --noEmit
-
-# 11. 提交 + 打 tag + push
-git add -A && git commit -m "feat(v8.24.0): merge upstream ..." --no-verify
-git tag v8.24.0 -a -m "Release v8.24.0"
-git push origin main --force --no-verify
-git push origin v8.24.0 --force --no-verify
-```
-
-**tsconfig.json 排除测试**：
-```json
-"exclude": ["node_modules", "out", "src/**/__tests__/**", "src/**/*.test.ts",
-            "src/**/*.test.tsx", "src/**/*.browser.test.ts", "src/**/*.browser.test.tsx"]
 ```
 
 ## 关键设计决策
@@ -541,31 +475,35 @@ stale config from restored backup、上游 PR 误改 import 路径、用户手�
 pairedAudiobook config 都可能让 stub 被实际调用。返回空 / null 让上层
 `.catch(() => null)` 兜底。
 
-### 19. Admin 用户详情 Modal — 已移除（v8.24.0）
+### 19. Admin 用户详情 Modal（v8.19.4）
 
-**历史**：v8.19.4 引入了 `UserDetailModal`，让 admin 在 AllUsersModal 里
-点击用户行的 chevron 按钮查看其书籍列表 + 回收站条目。
+**问题**：admin 在 AllUsersModal 里看到用户列表，但点开某个用户只能 Edit /
+Delete，看不到该用户实际存了什么书、回收站里有什么。无法回答「这个用户
+为什么占了 5GB 存储？」。
 
-**v8.24.0 移除**：用户反馈不需要此功能。已删除：
-- `UserManagement.tsx` 中的 `UserDetailModal` 函数（~340 行）+ `detailUser`
-  state + `onShowDetail` 回调 + chevron 按钮 + `AdminBookItem` /
-  `AdminRecycleItem` / `SortKey` / `formatBytes` / `formatDate` 辅助类型
-- `AllUsersModal` 的 `onShowDetail` prop
-- `IoChevronDownOutline` import
-- `pages/api/admin/users/[id]/books.ts`（API 路由）
-- `pages/api/admin/users/[id]/recycle-bin.ts`（API 路由）
-- `pages/api/admin/users/[id]/` 空目录
+**方案**：`UserManagement.tsx` 新增 `UserDetailModal`：
+- 触发：admin 在 AllUsersModal 里点击某个用户行的 chevron 按钮
+- 内容：
+  1. 用户信息卡（头像、邮箱、角色徽章、创建时间、最后登录、配额）
+  2. 书籍列表（搜索 + 排序 by title / upload date / file size，可升降序）
+  3. 回收站条目（多选 + 「Restore Selected」/ 「Permanently Delete
+     Selected」按钮）
 
-**保留**（仍然存在，管理员仍可使用）：
-- `UserManagement.tsx` 的列表 / 编辑 / 删除用户功能
-- `AdminFileTransfer.tsx`（管理员跨用户文件操作）
-- `AllUsersModal`（"查看全部用户"折叠 Modal）
-- `RoleBadge`（super_admin 金色 / admin 蓝色徽章）
-- `UserEditDialog`（创建/编辑用户对话框）
+**API**：
+- `GET /api/admin/users/[id]/books` — admin-only（isAdmin role），返回
+  target 用户的 Book rows + File size（按 bookHash 关联，仅 owner File
+  的 fileSize 算入，reference File 的 fileSize = 0）
+- `GET /api/admin/users/[id]/recycle-bin` — admin-only，列出 target 用户
+  的 RecycleBinItem 行（先自动清理过期的）
+- `POST /api/admin/users/[id]/recycle-bin?action=restore` / `?action=delete`
+  `{ ids: string[] }` — admin 跨用户操作回收站
 
-如未来要恢复查看用户书籍功能，需要重新加：
-1. `pages/api/admin/users/[id]/books.ts` + `recycle-bin.ts` API 路由
-2. `UserManagement.tsx` 中的 `UserDetailModal` 函数 + chevron 按钮
+**安全**：
+- 服务端用 `validateUserAndToken` + `isAdmin` 双重校验
+- 前端不传 canManageUser（防伪造），用 canManageUserClient 决定 UI 是否显示
+  chevron 按钮（不能管理的用户连点开详情的入口都没有）
+- recycle-bin 的 delete 路径走 #14 的去重逻辑，不会因为 admin 删了一本书
+  就把另一个用户引用的同物理文件删掉
 
 ## CORS / URL 修复清单
 
@@ -781,75 +719,7 @@ Next.js 在多语言 i18n 包 + foliate-js 编译时容易 OOM。
 - `DEPLOY.md` — 部署与验证文档
 - GitHub Release + tag（v8.x.y）+ GHCR image 自动构建
 
-## 当前版本（v8.24.0）
-
-### 已完成 — v8.24.0
-
-**上游合并 v0.12.6 → v0.12.10**（一个多月，62536 行新增，734 个文件变更）：
-
-- **合并策略**：4-bucket 分类（Python 脚本驱动），不再用「工作区直接覆盖」
-  - A 纯上游 (215 文件)：直接覆盖
-  - B Lite 自定义需三方合并 (19 文件)：手动合并 7 个冲突
-  - C Lite 跳过的功能 (92 文件)：iOS CarPlay / Android Auto / BookOrbit audiobook / KOReader / RSS / OPDS / localsend — 跳过 + 创建 stub
-  - D 测试 (362 文件)：从 tsconfig.json 排除
-
-- **新增 v0.12.10 功能**（全部落地）：
-  - 可配置书架（BookshelvesDialog + services/bookshelves/* 10 个文件）
-  - 书籍标签 + TaggingModal
-  - 书库分页 + 过滤编辑器
-  - AnnotationNoteEditor + NoteEditorSheet（标注编辑器重构）
-  - 段落选择、侧栏 BooknoteTime
-  - Header/Footer 样式自定义
-  - ExternalLinkConfirm 阅读器外链确认
-  - FileSyncReport
-  - Readera 注解 provider
-  - MP3 时长 / Spread / WindowPointerDrag / HTML book 工具
-  - ViewTransitions 重构
-
-- **新增 stub**（v0.12.10 跳过的功能）：
-  - ABS ebook streaming（services/audiobookshelf/ebookFetch.ts）
-  - BookOrbit narration（services/bookorbit/narration.ts）
-  - audiobook media proxy（services/audiobook/mediaProxy.ts）
-  - BlobAudioClock（services/audiobook/AudiobookClock.ts）
-  - audiobookshelf offline（services/audiobookshelf/offline.ts）
-  - absServerStore.findABSServerById
-  - useABSProgressSync + useNotionSync hooks
-  - CarMediaLibraryBridge
-  - Stripe portal flow type
-
-- **新增类型字段**（types/book.ts + types/settings.ts）：
-  - BookFormat: OPDSAUDIO / BOOKORBIT / HTML
-  - Book: absDownloadedAt / absMediaType='ebook'
-  - BookLayout: scrolledDirection / webtoonMode / lockHorizontalPan / disablePullDownToBookmark
-  - ViewConfig: headerFooterFontSize / headerFooterTextColor / headerFooterBackground / headerFooterBgOpacity
-  - TTSConfig: ttsSkipInlineAnnotations
-  - TranslatorConfig: translateSourceLang
-  - BookConfig: widePages
-  - BooksGroup: localized
-  - BookLookupIndex: byStableKey
-  - SystemSettings: bookshelves?: BookshelfState
-  - NotionSettings（完整版）+ BookOrbitSettings.autoSync + WebDAVBrowseSortByType
-
-- **v8.24.0 用户反馈移除**：
-  - Admin UserDetailModal（管理员查看每个用户书籍 + 回收站）— 详见 §19
-  - 同时删除 pages/api/admin/users/[id]/books.ts + recycle-bin.ts API 路由
-
-- **Lite 自定义全部保留**：JWT 认证、Prisma storage API、AdminFileTransfer、
-  RecycleBin、AboutWindow（Readest Lite 品牌）、player 重定向、LibraryHeader/
-  ViewMenu/SettingsMenu、fonts（无 hostedCJKFonts）+ updater + sw.ts
-
-- **验证**：tsc --noEmit 0 错误，CI 应通过
-
-### 下一版计划（占位）
-
-- 等待上游下一个版本（v0.12.11+），评估新功能
-- 考虑给 GroupManagementModal 加拖拽排序（当前用上下移按钮）
-- 考虑把 ReadEra zip 备份直接接收（用户当前需手动解压）
-- 考虑给 NotionSync 加自动同步（当前仅手动触发）
-
----
-
-### 历史版本
+## 当前版本（v8.22.0）
 
 ### 已完成 — v8.22.0
 
@@ -907,7 +777,7 @@ Next.js 在多语言 i18n 包 + foliate-js 编译时容易 OOM。
 
 - v8.19.4: 阅读统计加密同步到所有设备（scope='reading_stats'）
 - v8.19.4: ABS / LocalSend / Audiobook stubs 全部改为非阻塞
-- v8.19.4: ~~Admin 用户详情 Modal（books + recycle-bin 跨用户操作）~~ → **v8.24.0 已移除**（用户反馈不需要）
+- v8.19.4: Admin 用户详情 Modal（books + recycle-bin 跨用户操作）
 
 ### v8.19.3 及之前
 
@@ -920,3 +790,14 @@ Next.js 在多语言 i18n 包 + foliate-js 编译时容易 OOM。
 - v8.18.4: 加密设置同步（system / global_view / global_read scope）
 - v8.18.3: feed:// 书籍分享 + RSS favicon
 - v8.18.x: 多项 CORS / URL / stub fixes
+
+### 下一版计划（占位）
+
+- 上游 v0.12.7/v0.12.8 还有以下功能待评估移植：
+  - Zoom 快捷键调字号（#6067）
+  - 库/阅读器独立主题模式（#6113）
+  - PDF 锁横向 pan toggle（#6030）
+  - Proofread TTS 规则创建面板（#6109）
+- 考虑给 GroupManagementModal 加拖拽排序（当前用上下移按钮）
+- 考虑把 ReadEra zip 备份直接接收（用户当前需手动解压）
+- 考虑给 NotionSync 加自动同步（当前仅手动触发）
